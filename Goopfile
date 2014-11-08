@@ -1,1 +1,2 @@
-github.com/mxk/go-sqlite/sqlite3 //SQLite driver
+github.com/mxk/go-sqlite/sqlite3
+github.com/gorilla/mux
