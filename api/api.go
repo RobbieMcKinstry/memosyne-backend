@@ -55,7 +55,7 @@ func Db_connect() *sql.DB {
 
 //create user table
 func Create_User_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT PRIMARY KEY NOT NULL, 'password' TEXT NOT NULL)"
+	createString := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
 	rows, err := connection.Query(createString)
 	rows.Close()
 	if err != nil {
@@ -88,7 +88,7 @@ func Create_Contact_Reference_table(connection *sql.DB) bool {
 }
 
 func Create_Memo_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES COntact(cid))"
+	createString := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
 	rows, err := connection.Query(createString)
 	rows.Close()
 	if err != nil {
@@ -99,7 +99,7 @@ func Create_Memo_table(connection *sql.DB) bool {
 }
 
 func Create_Session_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, FOREIGN KEY(user_id) REFERENCES User(user_id))"
+	createString := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
 	rows, err := connection.Query(createString)
 	rows.Close()
 	if err != nil {
