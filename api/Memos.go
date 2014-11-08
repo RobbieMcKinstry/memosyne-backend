@@ -34,7 +34,7 @@ func (this *Memo) MemoAdd() bool {
 }
 
 /* Saves contact data to db */
-func (this *Memo) Save() {
+func (this *Memo) MemoSave() {
   db := Db_connect()
   rows, err := db.Query("UPDATE Memo SET body=?, time=? WHERE sender_id=? AND recipient_id", this.body, this.time, this.sender_id, this.recipient_id)
   if err != nil {
@@ -43,7 +43,7 @@ func (this *Memo) Save() {
   rows.Close()
 }
 
-func (this *Memo) Delete() bool {
+func (this *Memo) MemoDelete() bool {
   ret := true
   db := Db_connect()
 
