@@ -12,7 +12,8 @@ func ContactNew(user_id int,p_num string,first_name string, last_name string) *C
   }
   counter = counter + 1
   rows, err := db.Query("INSERT INTO 'Contact_Reference' VALUES(?,?)",user_id,counter)
-  newContact := &Contact{contact_id, p_num, stat}
+  //default to approved (2) status for now
+  newContact := &Contact{contact_id, p_num, 2,first_name,last_name}
   newContact.ContactAdd()
   rows.Close()
   return newContact
