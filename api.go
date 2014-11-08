@@ -41,10 +41,15 @@ type Session struct {
 }
 
 func Db_connect() *sql.DB {
-	db, err := sql.Open("sqlite3", "sqlite.db")
+	db, err := sql.Open("sqlite3", "sqlite.db")  
 	if err != nil {
 		fmt.Println(err)
 	}
+  rows ,err2:= db.Query("PRAGMA foreign_keys = ON;")
+  if err2 != nil{
+    fmt.Println(err)
+  }
+  rows.Close()
 	return db
 }
 
