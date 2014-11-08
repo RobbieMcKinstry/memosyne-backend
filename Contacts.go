@@ -48,15 +48,16 @@ func (this *Contact) delete() bool {
     return ret
 }
 
-/* checks to see if the contact is accepted */
-func (this *Contact) isAccepted() bool {
+/* checks to see if the contact is accepted - unsure as to why this exists... */
+/*
+func (this *Contact) isAccepted(externalUser *User) bool {
 
     db, err := sql.Open("sqlite3", "sqlite.db")
     if err != nil {
         fmt.Println(err)
     }
 
-    ret, err := db.Query("SELECT status FROM Contact WHERE cid=?", this.cid)
+    ret, err := db.Query("SELECT status FROM Contact WHERE cid=?", externalUser.cid)
     if err != nil {
         fmt.Println(err)
     }
@@ -64,6 +65,7 @@ func (this *Contact) isAccepted() bool {
     db.Close()
     return ret
 }
+*/
 
 /* Saves contact data to db */
 func (this *Contact) save() {
