@@ -1,3 +1,4 @@
+package api
 
 type Contact struct {
   cid int
@@ -9,14 +10,15 @@ func (this *Contact) save() {
 
 }
 
-func (this *Contact) new() *contact {
-
+func (this *Contact) new() *Contact {
+    ret := new (Contact)
+    return ret
 }
 
 func (this *Contact) delete() bool {
-
+    return true
 }
 
 func (this *Contact) isAccepted() bool {
-    
+    return true
 }
