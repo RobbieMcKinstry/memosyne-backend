@@ -9,7 +9,7 @@ import (
 
 type User struct {
 	phone_num   string
-  email       string
+    email       string
 	first_name  string
 	last_name   string
 	user_id     int
@@ -26,6 +26,8 @@ type Memo struct {
 type Contact struct {
 	cid          int
 	phone_num string
+    first_name string
+    last_name string
 	status       int
 }
 
@@ -220,6 +222,96 @@ func GetUserByPhone(phone, connection *sql.DB) *User {
   return ret
 }
 
+func GetUserByEmail(e_mail, connection *sql.DB) *User {
+  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE email=?", e_mail)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var count int
+  for rows.Next() {
+    err = rows.Scan(&count)
+  }
+  
+  fmt.Println(count)
+  
+  if count == 0 {
+    return nil
+  }
+  
+  rows, err = connection.Query("SELECT * FROM User WHERE email=?", e_mail)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var p_num string
+  var mail string
+  var f_name string
+  var l_name string
+  var u_id int
+  var pass string
+  
+  defer rows.Close()
+  for rows.Next() {
+
+    err = rows.Scan(&p_num, &mail, &f_name, &l_name, &u_id, &pass)
+  }
+    
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
+  
+  ret := &User{p_num, mail, f_name, l_name, u_id, pass}
+  
+  return ret
+}
+
+func GetUserByID(id, connection *sql.DB) *User {
+  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE user_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var count int
+  for rows.Next() {
+    err = rows.Scan(&count)
+  }
+  
+  fmt.Println(count)
+  
+  if count == 0 {
+    return nil
+  }
+  
+  rows, err = connection.Query("SELECT * FROM User WHERE user_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var p_num string
+  var mail string
+  var f_name string
+  var l_name string
+  var u_id int
+  var pass string
+  
+  defer rows.Close()
+  for rows.Next() {
+
+    err = rows.Scan(&p_num, &mail, &f_name, &l_name, &u_id, &pass)
+  }
+    
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
+  
+  ret := &User{p_num, mail, f_name, l_name, u_id, pass}
+  
+  return ret
+}
+
 func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
   rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE sender_id=?, recipient_id=?", s_id, r_id)
   if err != nil {
@@ -264,7 +356,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 
 func GetContactByID(id int, connection *sql.DB) *Contact {
   
-  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE c_id=?", id)
+  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE cid=?", id)
   if err != nil {
     fmt.Println(err)
   }
@@ -280,18 +372,20 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
     return nil
   }
   
-  rows, err = connection.Query("SELECT * FROM User WHERE c_id=?", id)
+  rows, err = connection.Query("SELECT * FROM User WHERE cid=?", id)
   if err != nil {
     fmt.Println(err)
   }
   
   var contact_id int
   var p_num string
+  var f_name string
+  var l_name string
   var stat int
   
   defer rows.Close()
   for rows.Next() {
-    err = rows.Scan(&contact_id, &p_num, &stat)
+    err = rows.Scan(&contact_id, &p_num, &f_name, &l_name, &stat)
   }
   
   if err != nil {
@@ -299,7 +393,7 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
     return nil
   }
   
-  ret := &Contact{contact_id, p_num, stat}
+  ret := &Contact{contact_id, p_num, f_name, l_name, stat}
   
   return ret
 }
