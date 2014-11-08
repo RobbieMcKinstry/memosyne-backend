@@ -1,0 +1,2 @@
+github.com/mxk/go-sqlite //SQLite driver
+github.com/coopernurse/gorp //GORP ORM
