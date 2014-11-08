@@ -4,4 +4,4 @@ clear:
 	clear
 
 serve:
-	go run main.go
+	goop exec go run main.go
