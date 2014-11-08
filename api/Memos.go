@@ -1,7 +1,21 @@
 /*---------- Memos Methods ----------*/
 func MemoNew(sid int, rid int, b string, t string) *Memo {
   newMemo := &Memo{sid, rid, b, t}
-  newMemo.MemoAdd()
+  
+  db := Db_connect()
+  rows, err := db.Query("SELECT Contact.status FROM Contact, Contact_Reference WHERE Contact_Reference.contact_ref = ? AND Contact.cid = ? AND Contact.cid = Contact_Reference.contact_id;", sid,rid)
+  
+  var contactstatus int;
+  
+  for rows.Next(){
+    err := rows.Scan(&contactstatus)
+  }
+  if(contactstatus == 2){
+    newMemo := {sid,rid,b,t}
+    newMemo.MemoAdd()
+  } else {
+    newMemo := nil
+  }
   return newMemo
 }
 
