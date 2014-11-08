@@ -71,6 +71,19 @@ func (this *User) UserDelete() bool {
     return ret
 }   
 
+func (this *User) equals(externalUser *User) bool {
+    ret := false
+    if externalUser.phone_num == this.phone_num &&
+       externalUser.first_name == this.first_name &&
+       externalUser.last_name == this.last_name &&
+       externalUser.user_id == this.user_id &&
+       externalUser.contact_ret == this.contact_ret &&
+       externalUser.password == this.password {
+         ret = true
+       }
+    return ret
+}
+
 /*
  * Returns a slice of pointers to all Contact objects stored in the db
  */
