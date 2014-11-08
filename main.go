@@ -8,16 +8,15 @@ import (
 	"net/http"
 )
 
-// TODO 
-func HandleContactsRead(w http.ResponseWriter, r *http.Request)   {
+// TODO
+func HandleContactsRead(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`
 		{ "contacts": [{"name": "Malcomn Reynolds", "number": "+14123444123"}, {"name": "Robbie mcKinstry", "number": "+14124453171"}]
 		}
 	`))
 }
-func HandleMemoCreate(w http.ResponseWriter, r *http.Request)     {
+func HandleMemoCreate(w http.ResponseWriter, r *http.Request) {
 }
-
 
 func main() {
 	log.Println("Hello Memosyne")
