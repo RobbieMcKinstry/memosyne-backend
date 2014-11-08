@@ -470,6 +470,54 @@ func GetContactsByUserID(user_id int) []*Contacts {
     return contactPointerList
 }
 
+/*
+ a function that gets me all 
+ the memos within a certain time frame
+*/
+func getMemosWithinRange(date1 string, date2 string) []*Memo {
+  
+  db = Db_connect()
+  memos, err := db.Query("SELECT * FROM Memos")
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var memosWithinRange []*Memo
+  memosWithinRange = make([]*Memo, len(memos))
+
+  defer memos.Close()
+  for memos.Next() {
+      var theSenderId int
+      var theRecipientId int
+      var theBody string
+      var theTime time.Time    
+
+      err = memos.Scan(
+        &theSenderId,
+        &theRecipientId,
+        &theBody,
+        &theTime
+      )
+
+      //func Parse(layout, value string) (Time, error)
+      var res := Parse(Time.RFC822Z, theTime)
+
+      //func (t Time) After(u Time) bool
+      if res.Before(date1) && res.After(date2) {
+        memoObj := &Memo{
+          theSenderId,
+          theRecipientId,
+          theBody,
+          theTime
+        }
+        memosWithinRange = append(memosWithinRange, memoObj)        
+      }       
+  }
+  db.Close()
+  return memosWithinRange
+}
+
 func main() {
   Create_tables(Db_connect())
 }
+
