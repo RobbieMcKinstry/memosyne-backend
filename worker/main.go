@@ -27,7 +27,7 @@ func main() {
 	}
 
 	endTime := time.Now()
-	startTime := time.Now().Add(-1*time.Minute)
+	startTime := time.Now().Add(-1 * time.Minute)
 	memosToSend := AllMemosByTime(startTime, endTime)
 
 	for _, memo := range memosToSend {
