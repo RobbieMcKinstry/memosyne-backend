@@ -474,7 +474,7 @@ func GetContactsByUserID(user_id int) []*Contacts {
  a function that gets me all 
  the memos within a certain time frame
 */
-func getMemosWithinRange(date1 string, date2 string) []*Memo {
+func GetMemosWithinRange(date1 string, date2 string) []*Memo {
   
   db = Db_connect()
   memos, err := db.Query("SELECT * FROM Memos")
@@ -515,6 +515,67 @@ func getMemosWithinRange(date1 string, date2 string) []*Memo {
   }
   db.Close()
   return memosWithinRange
+}
+
+/* returns a dynamically allocated slice containing pointers to Memo objects related to the userID passed */
+func GetMemosByUserID(uid int) []*Memos { 
+    db := Db_connect()
+
+    memos, err := db.Query("SELECT * FROM Memos")
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    var memoPointerList []*Memos
+    memoPointerList = make([]*Memo, len(memos))
+    
+    defer memos.Close()
+    for memos.Next() {
+
+        var theSenderId int
+        var theRecipientId int
+        var theBody string
+        var theTime string
+
+        err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
+        
+        if theSenderId == uid {
+            newMemObj := &Memo(theSenderId, theRecipientId, theBody, theTime)
+            memoPointerList = append(memoPointerList, newMemoObj)
+        }
+    }
+    db.Close()
+    return memoPointerList
+}
+
+/* returns a dynamically allocated slice containing pointers to Memo objects */
+func GetMemos() []*Memos { 
+    db := Db_connect()
+
+    memos, err := db.Query("SELECT * FROM Memos")
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    var memoPointerList []*Memos
+    memoPointerList = make([]*Memo, len(memos))
+    
+    defer memos.Close()
+    for memos.Next() {
+
+        var theSenderId int
+        var theRecipientId int
+        var theBody string
+        var theTime string
+
+        err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
+        
+        newMemObj := &Memo(theSenderId, theRecipientId, theBody, theTime)
+        memoPointerList = append(memoPointerList, newMemoObj)
+    }
+    
+    db.Close()
+    return memoPointerList
 }
 
 func main() {
