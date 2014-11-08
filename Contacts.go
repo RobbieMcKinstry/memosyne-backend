@@ -1,93 +1,37 @@
-/* 
- * Methods for Contact class
- *      
- *      Author: Tyler Raborn
- */
-
-package main
-
-import (
-    "database/sql"
-    "fmt"
-    _ "github.com/mxk/go-sqlite/sqlite3"
-)
-
-func (this *Contact) newContact() *Contact {
-    ret := new (Contact)
-    
-    db, err := sql.Open("sqlite3", "sqlite.db")
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    rows, err := db.Query("SELECT * FROM Contact WHERE Contact.cid=?", this.cid)
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    if rows != nil {
-        /* user exists! */
-
-    }
-
-    db.Close()
-
-    return ret
+/*--------- Contacts Methods ----------*/
+func (this *Contact) ContactNew() bool {
+  ret := true
+  db := Db_connect()
+  
+  rows, err := db.Query("INSERT INTO Contact VALUES (?, ?, ?)", this.cid, this.phone_num, this.status)
+  if err != nil {
+    ret = false
+  }
+  rows.Close()
+  
+  return ret
 }
 
-func (this *Contact) delete() bool {
+func (this *Contact) Delete() bool {
+  ret := true
+  db := Db_connect()
 
-    ret := false
-
-    db, err := sql.Open("sqlite3", "sqlite.db")
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    result, err := db.Exec("DELETE FROM Contact WHERE Contact.cid=?", this.cid)
-    if err != nil {
-        fmt.Println(err)
-        ret = true
-    }
-
-    db.Close()
-    return ret
+  rows, err := db.Query("DELETE FROM Contact WHERE Contact.cid=?", this.cid)
+  if err != nil {
+      ret = false
+  }
+  rows.Close()
+  
+  return ret
 }
-
-/* checks to see if the contact is accepted - unsure as to why this exists... */
-/*
-func (this *Contact) isAccepted(externalUser *User) bool {
-
-    db, err := sql.Open("sqlite3", "sqlite.db")
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    ret, err := db.Query("SELECT status FROM Contact WHERE cid=?", externalUser.cid)
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    db.Close()
-    return ret
-}
-*/
 
 /* Saves contact data to db */
-func (this *Contact) save() {
-
-    db, err := sql.Open("sqlite3", "sqlite.db")
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    db.Exec(
-        "INSERT INTO Contact VALUES (?, ?, ?)", 
-        this.cid, 
-        this.phone_number, 
-        this.status
-    )
-    
-    db.Close()
+func (this *Contact) Save() {
+  db := Db_connect()
+  rows, err := db.Query("UPDATE Session SET phone_num=?, status=? WHERE cid=?", this.phone_num, this.status, this.cid)
+  if err != nil {
+    //Do nothing
+  }
+  rows.Close()
 }
-
+/*--------- END CONTACTS -----------*/

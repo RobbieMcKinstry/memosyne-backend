@@ -24,7 +24,7 @@ type Memo struct {
 
 type Contact struct {
 	cid          int
-	phone_number string
+	phone_num string
 	status       int
 }
 
@@ -344,12 +344,137 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 
 /*---------- Session Methods ----------*/
 
+//Save changes to session
+func (this *Session) Save() {
+  db := Db_connect()
+  rows, err := db.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", this.expiration, this.user_id, this.session_id)
+  if err != nil {
+    //Do nothing
+  }
+  rows.Close()
+}
+
+//Make a new session
+func (this *Session) SessionNew() bool {
+  ret := true
+  db := Db_connect()
+  
+  rows, err := db.Query("INSERT INTO Session VALUES (?, ?, ?)", this.session_id, this.expiration, this.user_id)
+  if err != nil {
+    ret = false
+  }
+  rows.Close()
+  
+  return ret
+}
+
+//Delete session from db
+func (this *Session) Delete() bool {
+  ret := true
+  db := Db_connect()
+  
+  rows, err := db.Query("DELETE FROM Session WHERE Session.session_id=?", this.session_id)
+  if err != nil {
+    ret = false
+  }
+  rows.Close()
+  
+  return ret
+}
+
+func (this *Session) IsValid() bool {
+  ret := false
+  
+  session_time, _ := time.Parse(time.RFC822Z, this.expiration)
+  
+  if session_time.After(time.Now()) == true {
+    ret = true
+  }
+  
+  return ret
+}
+/*---------- END SESSIONS ----------*/
+
+
+/*--------- Contacts Methods ----------*/
+func (this *Contact) ContactNew() bool {
+  ret := true
+  db := Db_connect()
+  
+  rows, err := db.Query("INSERT INTO Contact VALUES (?, ?, ?)", this.cid, this.phone_num, this.status)
+  if err != nil {
+    ret = false
+  }
+  rows.Close()
+  
+  return ret
+}
+
+func (this *Contact) Delete() bool {
+  ret := true
+  db := Db_connect()
+
+  rows, err := db.Query("DELETE FROM Contact WHERE Contact.cid=?", this.cid)
+  if err != nil {
+      ret = false
+  }
+  rows.Close()
+  
+  return ret
+}
+
+/* Saves contact data to db */
+func (this *Contact) Save() {
+  db := Db_connect()
+  rows, err := db.Query("UPDATE Session SET phone_num=?, status=? WHERE cid=?", this.phone_num, this.status, this.cid)
+  if err != nil {
+    //Do nothing
+  }
+  rows.Close()
+}
+/*--------- END CONTACTS -----------*/
+
+
+/*---------- Memos Methods ----------*/
+func (this *Memo) MemoNew() bool {
+  ret := true
+  db := Db_connect()
+  
+  rows, err := db.Query("INSERT INTO Memo VALUES (?, ?, ?, ?)", this.sender_id, this.recipient_id, this.body, this.time)
+  if err != nil {
+    ret = false
+  }
+  rows.Close()
+  
+  return ret
+}
+
+func (this *Memo) Delete() bool {
+  ret := true
+  db := Db_connect()
+
+  rows, err := db.Query("DELETE FROM Memo WHERE Memo.sender_id=? AND Memo.recipient_id=?", this.sender_id, this.recipient_id)
+  if err != nil {
+      ret = false
+  }
+  rows.Close()
+  
+  return ret
+}
+
+/* Saves contact data to db */
+func (this *Memo) Save() {
+  db := Db_connect()
+  rows, err := db.Query("UPDATE Memo SET body=?, time=? WHERE sender_id=? AND recipient_id", this.body, this.time, this.sender_id, this.recipient_id)
+  if err != nil {
+    //Do nothing
+  }
+  rows.Close()
+}
+/*---------- MEMOS END ----------*/
+
+
+
 func main() {
   Create_tables(Db_connect())
-  value := GetSessionByID(1, Db_connect())
-  if value == nil {
-    fmt.Println("fuck")
-  } else {
-    fmt.Println(value.expiration, " ", value.user_id)
-  }
 }
