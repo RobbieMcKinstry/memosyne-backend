@@ -131,6 +131,135 @@ func Create_tables(connection *sql.DB) bool {
 	return true
 }
 
+func GetSessionByID(id int, connection *sql.DB) *Session {
+  rows, err := connection.Query("SELECT * FROM Session WHERE session_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var s_id int
+  var expr time.Time
+  var u_id int
+  
+  defer rows.Close()
+  for rows.Next() {
+    err = rows.Scan(&s_id, &expr, &u_id)
+  }
+
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
+  
+  ret := &Session{s_id, expr, u_id}
+  
+  return ret
+}
+
+func GetUserByID(id int, connection *sql.DB) *User {
+  rows, err := connection.Query("SELECT * FROM User WHERE user_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var p_num string
+  var f_name string
+  var l_name string
+  var u_id int
+  var c_ref int
+  var pass string
+  
+  defer rows.Close()
+  for rows.Next() {
+
+    err = rows.Scan(&p_num, &f_name, &l_name, &u_id, &c_ref, &pass)
+  }
+    
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
+  
+  ret := &User{p_num, f_name, l_name, u_id, c_ref, pass}
+  
+  return ret
+}
+
+func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
+  rows, err := connection.Query("SELECT * FROM User WHERE sender_id=?, recipient_id=?", s_id, r_id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var send_id int
+  var recip_id int
+  var message_body string
+  var message_time time.Time
+  
+  defer rows.Close()
+  for rows.Next() {
+    err = rows.Scan(&send_id, &recip_id, &message_body, &message_time)
+  }
+  
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
+  
+  ret := &Memo{send_id, recip_id, message_body, message_time}
+  
+  return ret
+}
+
+func GetContactByID(id int, connection *sql.DB) *Contact {
+  rows, err := connection.Query("SELECT * FROM User WHERE c_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var contact_id int
+  var p_num string
+  var stat int
+  
+  defer rows.Close()
+  for rows.Next() {
+    err = rows.Scan(&contact_id, &p_num, &stat)
+  }
+  
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
+  
+  ret := &Contact{contact_id, p_num, stat}
+  
+  return ret
+}
+
+func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
+  rows, err := connection.Query("SELECT * FROM User WHERE contact_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var c_ref int
+  var c_id int
+  
+  defer rows.Close()
+  for rows.Next() {
+    err = rows.Scan(&c_ref, &c_id)
+  }
+  
+  if err != nil {
+    fmt.Println(err)
+    return nil
+  }
+  
+  ret := &Contact_reference{c_ref, c_id}
+  
+  return ret
+}
+
 func main() {
-	Create_tables(Db_connect())
+	
 }

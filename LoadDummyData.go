@@ -28,12 +28,12 @@ func main() {
     contactRef := 3    
     db.Exec("INSERT INTO User VALUES (\"111-222-3333\", \"Bill\", \"Mike\", 1, 3, \"password\")")
 
-    timeVal := Now()
+    timeVal := time.Now()
     db.Exec("INSERT INTO Memo VALUES (1, 2, \"Lots of information\", " + timeVal + ")")
 
     db.Exec("INSERT INTO Contact_Reference VALUES (8, 9)")
 
-    db.Exec("INSERT INTO Session VALUES (109, " + Now() + ", 20)")
+    db.Exec("INSERT INTO Session VALUES (109, " + time.Now() + ", 20)")
 
     db.Close()
 }
