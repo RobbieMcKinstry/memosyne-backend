@@ -118,18 +118,46 @@ func (this *User) GetContacts() []*Contact {
 
         contactPointerList = append(contactPointerList, newContactObj)
     }
-    contacts.Close()
     db.Close()
     return contactPointerList
 }
 
-/* TODO: Finish implementing */
+/* returns a dynamically allocated slice containing pointers to Memo objects */
 func (this *User) GetMemos() []*Memos { 
+    db := Db_connect()
+
+    memos, err := db.Query("SELECT * FROM Memos")
+    if err != nil {
+        fmt.Println(err)
+    }
+
     var memoPointerList []*Memos
-    memoPointerList = make([]*Memo, 1)
+    memoPointerList = make([]*Memo, len(memos))
+    
+    defer memos.Close()
+    for memos.Next() {
+        newMemoObj := new (Memo)
+
+        var theSenderId int
+        var theRecipientId int
+        var theBody string
+        var theTime time.Time
+
+        err = memos.Scan(
+            &theSenderId,
+            &theRecipientId,
+            &theBody,
+            &theTime
+        )
+
+        newMemoObj.senderId = theSenderId
+        newMemoObj.recipientId = theRecipientId
+        newMemoObj.body = theBody
+        newMemoObj.time = theTime
+
+        memoPointerList = append(memoPointerList, newMemoObj)
+    }
+    db.Close()
     return memoPointerList
 }
-
-
-
 
