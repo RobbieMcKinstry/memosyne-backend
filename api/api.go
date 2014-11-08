@@ -438,6 +438,38 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
   return ret
 }
 
+func GetContactsByUserID(user_id int) []*Contacts {
+    db := Db_connect()
+    //contactCount, err := db.Query("SELECT COUNT(*) FROM Contact")
+    contacts, err := db.Query("SELECT C1.cid FROM(Contact as C1, Contact_Reference as C2) WHERE (C2.contact_ref=?, C2.contact_id=C1.cid)", user_id)
+    if err != nil {
+        fmt.Println(err)
+    }
+
+    var contactPointerList []*Contact
+    contactPointerList = make([]*Contact, len(contacts))
+
+    defer contacts.Close()
+    for contacts.Next() {
+        newContactObj := new (Contact)
+
+        var theCid int
+        var thePhoneNum string
+        var theFirstName string
+        var theLastName string
+        var theStatus int
+
+        err = contacts.Scan(&theCid, &thePhoneNum, &theFirstName, &theLastName, &theStatus
+        )
+
+        newContactObj := &Contact{theCid, thePhoneNum, theFirstName, theLastName, theStatus}
+
+        contactPointerList = append(contactPointerList, newContactObj)
+    }
+    db.Close()
+    return contactPointerList
+}
+
 func main() {
   Create_tables(Db_connect())
 }

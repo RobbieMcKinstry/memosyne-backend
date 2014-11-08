@@ -1,8 +1,26 @@
 /*---------- Session Methods ----------*/
 
 //Make new session
-func SessionNew(sid int, expr string, uid int) *Session {
-  newSession := &Session{sid, expr, uid}
+func SessionNew(email string, pass string) *Session {
+  db := Db_connect()
+  var newSession &Session
+  var sid int
+  curUser := GetUserByEmail(email, db)
+  if pass != curUser.password {
+    //return error
+  }
+  else {
+    //generate session id
+    rows, err := db.Query("SELECT MAX(session_id) FROM Session")
+    for rows.Next() {
+      err := rows.Scan(&sid)
+    }
+    if err != nil {
+      newSession = nil
+    }
+    sid = sid + 1
+    newSession = &Session{sid, "02 Jan 15 15:04 -0700", curUser.user_id}
+  }
   newSession.SessionAdd()
   return newSession
 }

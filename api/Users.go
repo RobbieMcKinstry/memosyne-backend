@@ -1,6 +1,17 @@
 /* Makes new User */
-func UserNew(p_num int, email string, f_name string, l_name string, uid int, pass string) *User {
-    newUser := &User{p_num, email, f_name, l_name, uid, pass}
+func UserNew(p_num int, email string, f_name string, l_name string, pass string) *User {
+    db := Db_connect()
+    var newUser &User
+    var uid int
+    rows, err := db.Query("SELECT MAX(user_id) FROM User")
+    for rows.Next() {
+        err := rows.Scan(&uid)
+    }
+    if err != nil {
+        newUser = nil
+    }
+    uid = uid + 1
+    newUser = &User{p_num, email, f_name, l_name, uid, pass}
     newUser.UserAdd()
     return newUser
 }
