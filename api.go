@@ -3,26 +3,15 @@ package api
 import (
   "fmt"
   "time"
-  "github.com/coopernurse/gorp"
-  _ "github.com/mxk/go-sqlite"
-  "databases/sql"
+  _ "github.com/mxk/go-sqlite/sqlite3"
+  "database/sql"
 )
-
-type User struct {
-  phone_num  string
-  first_name  string
-  last_name  string
-  user_id  int16
- 
-  contact_ref int16
-  password string
-}
 
 type Memo struct {
   sender_id int
   recipient_id int
   body string
-  time time.Date
+  time time.Time
 }
 
 type Contact struct {
@@ -38,12 +27,12 @@ type Contact_reference struct {
 
 type Session struct {
   session_id int
-  expiration time.Date
+  expiration time.Time
   user_id int
 }
 
 
-func Db_connect() *sql.DB {
+/*func Db_connect() *sql.DB {
   db, err := sql.Open("sqlite.db")
   if err != nil {
     fmt.Println(err)
@@ -61,4 +50,4 @@ func Create_tables(connection *sql.DB) {
 
 func main() {
   Create_tables
-}
+}*/
