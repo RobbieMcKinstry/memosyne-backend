@@ -6,6 +6,12 @@
 
 package main
 
+import (
+    "database/sql"
+    "fmt"
+    _ "github.com/mxk/go-sqlite/sqlite3"
+)
+
 func (this *Contact) newContact() *Contact {
     ret := new (Contact)
     
