@@ -12,7 +12,6 @@ type User struct {
 	first_name  string
 	last_name   string
 	user_id     int
-	contact_ref int
 	password    string
 }
 
@@ -20,7 +19,7 @@ type Memo struct {
 	sender_id    int
 	recipient_id int
 	body         string
-	time         time.Time
+	time         string
 }
 
 type Contact struct {
@@ -36,7 +35,7 @@ type Contact_reference struct {
 
 type Session struct {
 	session_id int
-	expiration time.Time
+	expiration string
 	user_id    int
 }
 
@@ -55,7 +54,7 @@ func Db_connect() *sql.DB {
 
 //create user table
 func Create_User_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT PRIMARY KEY NOT NULL,'contact_ref' INT NOT NULL, 'password' TEXT NOT NULL)"
+	createString := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT PRIMARY KEY NOT NULL, 'password' TEXT NOT NULL)"
 	rows, err := connection.Query(createString)
 	rows.Close()
 	if err != nil {
@@ -77,7 +76,7 @@ func Create_Contact_table(connection *sql.DB) bool {
 }
 
 func Create_Contact_Reference_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT PRIMARY KEY NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(contact_ref))"
+	createString := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
 	rows, err := connection.Query(createString)
 	rows.Close()
 	if err != nil {
@@ -88,7 +87,7 @@ func Create_Contact_Reference_table(connection *sql.DB) bool {
 }
 
 func Create_Memo_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' datetime, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES COntact(cid))"
+	createString := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES COntact(cid))"
 	rows, err := connection.Query(createString)
 	rows.Close()
 	if err != nil {
@@ -99,7 +98,7 @@ func Create_Memo_table(connection *sql.DB) bool {
 }
 
 func Create_Session_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' datetime, 'user_id' INT, FOREIGN KEY(user_id) REFERENCES User(user_id))"
+	createString := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, FOREIGN KEY(user_id) REFERENCES User(user_id))"
 	rows, err := connection.Query(createString)
 	rows.Close()
 	if err != nil {
@@ -131,14 +130,33 @@ func Create_tables(connection *sql.DB) bool {
 	return true
 }
 
+/*---------- GetValuesFromDBByID ----------*/
+
 func GetSessionByID(id int, connection *sql.DB) *Session {
-  rows, err := connection.Query("SELECT * FROM Session WHERE session_id=?", id)
+  rows, err := connection.Query("SELECT COUNT(*) FROM Session WHERE session_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var count int
+  for rows.Next() {
+    err = rows.Scan(&count)
+  }
+                   
+  
+  fmt.Println(count)
+  
+  if count == 0 {
+    return nil
+  }
+  
+  rows, err = connection.Query("SELECT * FROM Session WHERE session_id=?", id)
   if err != nil {
     fmt.Println(err)
   }
   
   var s_id int
-  var expr time.Time
+  var expr string
   var u_id int
   
   defer rows.Close()
@@ -157,7 +175,23 @@ func GetSessionByID(id int, connection *sql.DB) *Session {
 }
 
 func GetUserByID(id int, connection *sql.DB) *User {
-  rows, err := connection.Query("SELECT * FROM User WHERE user_id=?", id)
+  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE user_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var count int
+  for rows.Next() {
+    err = rows.Scan(&count)
+  }
+  
+  fmt.Println(count)
+  
+  if count == 0 {
+    return nil
+  }
+  
+  rows, err = connection.Query("SELECT * FROM User WHERE user_id=?", id)
   if err != nil {
     fmt.Println(err)
   }
@@ -166,13 +200,12 @@ func GetUserByID(id int, connection *sql.DB) *User {
   var f_name string
   var l_name string
   var u_id int
-  var c_ref int
   var pass string
   
   defer rows.Close()
   for rows.Next() {
 
-    err = rows.Scan(&p_num, &f_name, &l_name, &u_id, &c_ref, &pass)
+    err = rows.Scan(&p_num, &f_name, &l_name, &u_id, &pass)
   }
     
   if err != nil {
@@ -180,13 +213,29 @@ func GetUserByID(id int, connection *sql.DB) *User {
     return nil
   }
   
-  ret := &User{p_num, f_name, l_name, u_id, c_ref, pass}
+  ret := &User{p_num, f_name, l_name, u_id, pass}
   
   return ret
 }
 
 func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
-  rows, err := connection.Query("SELECT * FROM User WHERE sender_id=?, recipient_id=?", s_id, r_id)
+  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE sender_id=?, recipient_id=?", s_id, r_id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var count int
+  for rows.Next() {
+    err = rows.Scan(&count)
+  }
+  
+  fmt.Println(count)
+  
+  if count == 0 {
+    return nil
+  }
+  
+  rows, err = connection.Query("SELECT * FROM User WHERE sender_id=?, recipient_id=?", s_id, r_id)
   if err != nil {
     fmt.Println(err)
   }
@@ -194,7 +243,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
   var send_id int
   var recip_id int
   var message_body string
-  var message_time time.Time
+  var message_time string
   
   defer rows.Close()
   for rows.Next() {
@@ -212,7 +261,24 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 }
 
 func GetContactByID(id int, connection *sql.DB) *Contact {
-  rows, err := connection.Query("SELECT * FROM User WHERE c_id=?", id)
+  
+  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE c_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var count int
+  for rows.Next() {
+    err = rows.Scan(&count)
+  }
+  
+  fmt.Println(count)
+  
+  if count == 0 {
+    return nil
+  }
+  
+  rows, err = connection.Query("SELECT * FROM User WHERE c_id=?", id)
   if err != nil {
     fmt.Println(err)
   }
@@ -237,7 +303,23 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 }
 
 func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
-  rows, err := connection.Query("SELECT * FROM User WHERE contact_id=?", id)
+  rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE contact_id=?", id)
+  if err != nil {
+    fmt.Println(err)
+  }
+  
+  var count int
+  for rows.Next() {
+    err = rows.Scan(&count)
+  }
+  
+  fmt.Println(count)
+  
+  if count == 0 {
+    return nil
+  }
+  
+  rows, err = connection.Query("SELECT * FROM User WHERE contact_id=?", id)
   if err != nil {
     fmt.Println(err)
   }
@@ -260,6 +342,14 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
   return ret
 }
 
+/*---------- Session Methods ----------*/
+
 func main() {
-	
+  Create_tables(Db_connect())
+  value := GetSessionByID(1, Db_connect())
+  if value == nil {
+    fmt.Println("fuck")
+  } else {
+    fmt.Println(value.expiration, " ", value.user_id)
+  }
 }
