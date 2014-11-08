@@ -441,7 +441,7 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 func GetContactsByUserID(user_id int) []*Contacts {
     db := Db_connect()
     //contactCount, err := db.Query("SELECT COUNT(*) FROM Contact")
-    contacts, err := db.Query("SELECT C1.cid FROM(Contact as C1, Contact_Reference as C2) WHERE (C2.contact_ref=?, C2.contact_id=C1.cid)", user_id)
+    contacts, err := db.Query("SELECT * FROM Contact,Contact_Reference WHERE Contact_Reference.contact_ref=? AND Contact_Reference.contact_id=Contact.cid", user_id)
     if err != nil {
         fmt.Println(err)
     }
