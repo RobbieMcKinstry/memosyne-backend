@@ -502,7 +502,7 @@ func GetMemosWithinRange(date1 string, date2 string) []*Memo {
 		res := Parse(Time.RFC822Z, theTime)
 
 		//func (t Time) After(u Time) bool
-		if res.Before(date1) && res.After(date2) {
+		if res.After(date1) && res.Before(date2) {
 			memoObj := &Memo{
 				theSenderId,
 				theRecipientId,
