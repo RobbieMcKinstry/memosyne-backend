@@ -19,5 +19,9 @@ var _ = Describe("ORM", func() {
 			_, err := NewORM("phony.db")
 			Expect(err).NotTo(HaveOccurred())
 		})
+		It("should be connected", func() {
+			orm, _ := NewORM("phony.db")
+			Expect(orm.IsConnected()).To(Equal(true))
+		})
 	})
 })

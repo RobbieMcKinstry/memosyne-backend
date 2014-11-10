@@ -7,6 +7,8 @@ import (
 )
 
 type ORM interface {
+	IsConnected() bool
+
 	SaveContact(*Contact) *Contact
 	SaveMemo(*Memo)       *Memo
 	SaveUser(*User)	      *User
@@ -31,6 +33,11 @@ func NewORM(connectionString string) (ORM, error) {
 
 	result := &ormImplementation{ db }
 	return result, nil
+}
+
+func (orm *ormImplementation) IsConnected() bool {
+	err := orm.Ping()
+	return err == nil
 }
 
 func (orm *ormImplementation) SaveContact(c *Contact) *Contact { return c}
