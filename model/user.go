@@ -1,10 +1,11 @@
-package api
+package model
 
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mxk/go-sqlite/sqlite3"
 	"time"
+
+	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
 /* Makes new User */

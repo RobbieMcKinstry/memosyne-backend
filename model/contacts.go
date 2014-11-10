@@ -1,13 +1,13 @@
-package api
+package model
 
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mxk/go-sqlite/sqlite3"
 	"time"
+
+	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-/*--------- Contacts Methods ----------*/
 func ContactNew(user_id int, p_num string, first_name string, last_name string) *Contact {
 	ret := true
 	db := Db_connect()
@@ -63,5 +63,3 @@ func (this *Contact) ContactSave() {
 	}
 	rows.Close()
 }
-
-/*--------- END CONTACTS -----------*/
