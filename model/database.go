@@ -10,17 +10,17 @@ type ORM interface {
 	IsConnected() bool
 
 	SaveContact(*Contact) *Contact
-	SaveMemo(*Memo)       *Memo
-	SaveUser(*User)	      *User
+	SaveMemo(*Memo) *Memo
+	SaveUser(*User) *User
 	SaveSession(*Session) *Session
 
 	DeleteContact(*Contact) error
-	DeleteMemo(*Memo)       error
-	DeleteUser(*User)       error
+	DeleteMemo(*Memo) error
+	DeleteUser(*User) error
 	DeleteSession(*Session) error
 }
 
-type ormImplementation struct {
+type ormDelegate struct {
 	*sql.DB
 }
 
@@ -31,22 +31,21 @@ func NewORM(connectionString string) (ORM, error) {
 		return nil, err
 	}
 
-	result := &ormImplementation{ db }
+	result := &ormDelegate{db}
 	return result, nil
 }
 
-func (orm *ormImplementation) IsConnected() bool {
+func (orm *ormDelegate) IsConnected() bool {
 	err := orm.Ping()
 	return err == nil
 }
 
-func (orm *ormImplementation) SaveContact(c *Contact) *Contact { return c}
-func (orm *ormImplementation) SaveMemo(memo *Memo) *Memo {return memo}
-func (orm *ormImplementation) SaveUser(user *User) *User {return user}
-func (orm *ormImplementation) SaveSession(session *Session) *Session {return session}
+func (orm *ormDelegate) SaveContact(c *Contact) *Contact       { return c }
+func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo             { return memo }
+func (orm *ormDelegate) SaveUser(user *User) *User             { return user }
+func (orm *ormDelegate) SaveSession(session *Session) *Session { return session }
 
-func (orm *ormImplementation) DeleteContact(contact *Contact) error {return nil}
-func (orm *ormImplementation) DeleteMemo(memo *Memo) error {return nil}
-func (orm *ormImplementation) DeleteUser(user *User) error {return nil}
-func (orm *ormImplementation) DeleteSession(session *Session) error {return nil}
-
+func (orm *ormDelegate) DeleteContact(contact *Contact) error { return nil }
+func (orm *ormDelegate) DeleteMemo(memo *Memo) error          { return nil }
+func (orm *ormDelegate) DeleteUser(user *User) error          { return nil }
+func (orm *ormDelegate) DeleteSession(session *Session) error { return nil }
