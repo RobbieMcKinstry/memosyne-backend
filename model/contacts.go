@@ -1,13 +1,5 @@
 package model
 
-import (
-	"database/sql"
-	"fmt"
-	"time"
-
-	_ "github.com/mxk/go-sqlite/sqlite3"
-)
-
 func ContactNew(user_id int, p_num string, first_name string, last_name string) *Contact {
 	ret := true
 	db := Db_connect()
@@ -15,14 +7,15 @@ func ContactNew(user_id int, p_num string, first_name string, last_name string) 
 	if err != nil {
 		ret = false
 	}
+	_ = ret // TODO WTF is this ret for?
 	var counter int
 	for rows.Next() {
-		err := rows.Scan(&counter)
+		_ = rows.Scan(&counter)
 	}
 	counter = counter + 1
-	rows, err := db.Query("INSERT INTO 'Contact_Reference' VALUES(?,?)", user_id, counter)
+	rows, err = db.Query("INSERT INTO 'Contact_Reference' VALUES(?,?)", user_id, counter)
 	//default to approved (2) status for now
-	newContact := &Contact{contact_id, p_num, 2, first_name, last_name}
+	newContact := &Contact{counter, p_num, 2, first_name, last_name}
 	newContact.ContactAdd()
 	rows.Close()
 	return newContact

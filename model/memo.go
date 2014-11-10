@@ -1,10 +1,6 @@
 package model
 
 import (
-	"database/sql"
-	"fmt"
-	"time"
-
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
@@ -13,18 +9,18 @@ func MemoNew(sid int, rid int, b string, t string) *Memo {
 	newMemo := &Memo{sid, rid, b, t}
 
 	db := Db_connect()
-	rows, err := db.Query("SELECT Contact.status FROM Contact, Contact_Reference WHERE Contact_Reference.contact_ref = ? AND Contact.cid = ? AND Contact.cid = Contact_Reference.contact_id;", sid, rid)
+	rows, _ := db.Query("SELECT Contact.status FROM Contact, Contact_Reference WHERE Contact_Reference.contact_ref = ? AND Contact.cid = ? AND Contact.cid = Contact_Reference.contact_id;", sid, rid)
 
 	var contactstatus int
 
 	for rows.Next() {
-		err := rows.Scan(&contactstatus)
+		_ = rows.Scan(&contactstatus)
 	}
 	if contactstatus == 2 {
-		newMemo := &Memo{sid, rid, b, t}
+		newMemo = &Memo{sid, rid, b, t}
 		newMemo.MemoAdd()
 	} else {
-		newMemo := nil
+		newMemo = nil
 	}
 	return newMemo
 }

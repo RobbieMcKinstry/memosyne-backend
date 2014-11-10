@@ -1,8 +1,6 @@
-package session
+package model
 
 import (
-	"database/sql"
-	"fmt"
 	"time"
 
 	_ "github.com/mxk/go-sqlite/sqlite3"
@@ -15,14 +13,14 @@ func SessionNew(email string, pass string) *Session {
 	db := Db_connect()
 	var newSession *Session
 	var sid int
-	curUser := GetUserByEmail(email, db)
+	curUser := GetUserByEmail(db, email)
 	if pass != curUser.password {
 		//return error
 	} else {
 		//generate session id
 		rows, err := db.Query("SELECT MAX(session_id) FROM Session")
 		for rows.Next() {
-			err := rows.Scan(&sid)
+			_ = rows.Scan(&sid)
 		}
 		if err != nil {
 			newSession = nil

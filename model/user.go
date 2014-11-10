@@ -1,12 +1,6 @@
 package model
 
-import (
-	"database/sql"
-	"fmt"
-	"time"
-
-	_ "github.com/mxk/go-sqlite/sqlite3"
-)
+import "fmt"
 
 /* Makes new User */
 func UserNew(p_num int, email string, f_name string, l_name string, pass string) *User {
@@ -15,13 +9,13 @@ func UserNew(p_num int, email string, f_name string, l_name string, pass string)
 	var uid int
 	rows, err := db.Query("SELECT MAX(user_id) FROM User")
 	for rows.Next() {
-		err := rows.Scan(&uid)
+		_ = rows.Scan(&uid)
 	}
 	if err != nil {
 		newUser = nil
 	}
 	uid = uid + 1
-	newUser = &User{p_num, email, f_name, l_name, uid, pass}
+	//newUser = &User{p_num, email, f_name, l_name, uid, pass}
 	newUser.UserAdd()
 	return newUser
 }
@@ -46,7 +40,7 @@ func (this *User) UserAdd() bool {
 func (this *User) UserSave() {
 	db := Db_connect()
 
-	result, err := db.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", this.user_id, this.first_name, this.last_name, this.email, this.password, this.phnoe_num)
+	result, err := db.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", this.user_id, this.first_name, this.last_name, this.email, this.password, this.phone_num)
 	result.Close()
 	if err != nil {
 		//Do nothing

@@ -22,7 +22,7 @@ type ormImplementation struct {
 	*sql.DB
 }
 
-func NewORM(connectionString string) (ORM, err) {
+func NewORM(connectionString string) (ORM, error) {
 
 	db, err := sql.Open("sqlite3", "sqlite.db")
 	if err != nil {
@@ -30,16 +30,16 @@ func NewORM(connectionString string) (ORM, err) {
 	}
 
 	result := &ormImplementation{ db }
-	return result
+	return result, nil
 }
 
-func (orm ORM) SaveContact(c *Contact) *Contact {}
-func (orm ORM) SaveMemo(memo *Memo) *Memo {}
-func (orm ORM) SaveUser(user *User) *User {}
-func (orm ORM) SaveSession(session *Session) *Session {}
+func (orm *ormImplementation) SaveContact(c *Contact) *Contact { return c}
+func (orm *ormImplementation) SaveMemo(memo *Memo) *Memo {return memo}
+func (orm *ormImplementation) SaveUser(user *User) *User {return user}
+func (orm *ormImplementation) SaveSession(session *Session) *Session {return session}
 
-func (orm ORM) DeleteContact(contact *Contact) error {}
-func (orm ORM) DeleteMemo(memo *Memo) error {}
-func (orm ORM) DeleteUser(user *User) error {}
-func (orm ORM) DeleteSession(session *Session) error {}
+func (orm *ormImplementation) DeleteContact(contact *Contact) error {return nil}
+func (orm *ormImplementation) DeleteMemo(memo *Memo) error {return nil}
+func (orm *ormImplementation) DeleteUser(user *User) error {return nil}
+func (orm *ormImplementation) DeleteSession(session *Session) error {return nil}
 
