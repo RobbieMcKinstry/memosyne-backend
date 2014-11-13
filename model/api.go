@@ -112,7 +112,7 @@ func Create_Session_table(connection *sql.DB) bool {
 	return true
 }
 
-func Create_tables(connection *sql.DB) bool {
+func CreateTables(connection *sql.DB) bool {
 	if connection == nil {
 		return false
 	}
@@ -578,5 +578,5 @@ func GetMemos() []*Memo {
 }
 
 func main() {
-	Create_tables(Db_connect())
+	CreateTables(Db_connect())
 }

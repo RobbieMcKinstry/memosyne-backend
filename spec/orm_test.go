@@ -13,7 +13,7 @@ const (
 	PHONY_DB string = "phony.db"
 )
 
-func TestBooks(t *testing.T) {
+func TestORM(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Object relational mapper")
 }
@@ -25,13 +25,17 @@ var _ = Describe("ORM", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should be connected", func() {
-			orm, _ := NewORM(PHONY_DB)
+			orm, err := NewORM(PHONY_DB)
+			Expect(err).NotTo(HaveOccurred())
 			Expect(orm.IsConnected()).To(Equal(true))
 		})
 	})
-/*	Context("If I'm working with the database", func() {
+
+	Context("If I'm working with the database", func() {
 		Context("and I try and make a new user object", func() {
-			orm, _ := NewORM(PHONY_DB)
+			orm, err := NewORM(PHONY_DB)
+			//Expect(err).NotTo(HaveOccurred())
+			_ = err
 			user := &User{
 				Phone_num:  "412-445-3171",
 				Email:      "thesnowmancometh@gmail.com",
@@ -46,5 +50,4 @@ var _ = Describe("ORM", func() {
 
 		})
 	})
-*/
 })
