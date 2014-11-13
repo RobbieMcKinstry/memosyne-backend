@@ -25,11 +25,11 @@ type Memo struct {
 }
 
 type Contact struct {
-	cid        int
-	phone_num  string
-	status     int
-	first_name string
-	last_name  string
+	Cid        int
+	Phone_num  string
+	Status     int
+	First_name string
+	Last_name  string
 }
 
 type Contact_reference struct {
