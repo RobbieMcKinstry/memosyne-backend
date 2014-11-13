@@ -44,33 +44,17 @@ func (orm *ormDelegate) IsConnected() bool { return orm.Ping() == nil }
 
 func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 	contactSQL := "CREATE TABLE IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
-	result := orm.CreateTableFromString(contactSQL)
-	if !result {
-		return false
-	}
-
 	userSQL := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
-	result = orm.CreateTableFromString(userSQL)
-	if !result {
-		return false
-	}
-
 	contactReferenceSQL := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
-	result = orm.CreateTableFromString(contactReferenceSQL)
-	if !result {
-		return false
-	}
-
 	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
-	result = orm.CreateTableFromString(memoSQL)
-	if !result {
-		return false
-	}
-
 	sessionSQL := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
-	result = orm.CreateTableFromString(sessionSQL)
-	if !result {
-		return false
+
+	tables := []string{ contactSQL, userSQL, contactReferenceSQL, memoSQL, sessionSQL }
+	for _, tableSQL := range tables {
+		result := orm.CreateTableFromString(tableSQL)
+		if !result {
+			return false
+		}
 	}
 	return true
 }
@@ -101,7 +85,7 @@ func (orm *ormDelegate) SaveUser(user *User) *User {
 }
 
 func (orm *ormDelegate) newUser(user *User) {
-	id := orm.findIDFromTable("User")
+	id := orm.findIDFromTable("user_id", "User")
 	user.User_id = id
 	result, err := orm.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", user.Phone_num, user.Email, user.First_name, user.Last_name, user.User_id, user.Password)
 	if err != nil {
@@ -110,7 +94,7 @@ func (orm *ormDelegate) newUser(user *User) {
 	result.Close()
 }
 
-func (orm *ormDelegate) findIDFromTable(tableName string) int {
+func (orm *ormDelegate) findIDFromTable(idName, tableName string) int {
 	result := 1
 	rows, err := orm.Query(fmt.Sprintf("SELECT COUNT(*) FROM %v", tableName))
 	if err != nil {
@@ -126,7 +110,7 @@ func (orm *ormDelegate) findIDFromTable(tableName string) int {
 	}
 	if count != 0 {
 		var uid int
-		rows, err = orm.Query("SELECT MAX(user_id) FROM User")
+		rows, err = orm.Query(fmt.Sprintf("SELECT MAX(%v) FROM %v", idName, tableName))
 		if err != nil {
 			log.Println(err)
 		}
