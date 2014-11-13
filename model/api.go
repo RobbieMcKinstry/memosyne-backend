@@ -18,10 +18,10 @@ type User struct {
 }
 
 type Memo struct {
-	sender_id    int
-	recipient_id int
-	body         string
-	time         string
+	Sender_id    int
+	Recipient_id int
+	Body         string
+	Time         string
 }
 
 type Contact struct {

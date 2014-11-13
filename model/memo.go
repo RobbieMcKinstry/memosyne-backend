@@ -4,7 +4,6 @@ import (
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-/*---------- Memos Methods ----------*/
 func MemoNew(sid int, rid int, b string, t string) *Memo {
 	newMemo := &Memo{sid, rid, b, t}
 
@@ -30,7 +29,7 @@ func (this *Memo) MemoAdd() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("INSERT INTO Memo VALUES (?, ?, ?, ?)", this.sender_id, this.recipient_id, this.body, this.time)
+	rows, err := db.Query("INSERT INTO Memo VALUES (?, ?, ?, ?)", this.Sender_id, this.Recipient_id, this.Body, this.Time)
 	if err != nil {
 		ret = false
 	}
@@ -42,7 +41,7 @@ func (this *Memo) MemoAdd() bool {
 /* Saves contact data to db */
 func (this *Memo) MemoSave() {
 	db := Db_connect()
-	rows, err := db.Query("UPDATE Memo SET body=?, time=? WHERE sender_id=? AND recipient_id", this.body, this.time, this.sender_id, this.recipient_id)
+	rows, err := db.Query("UPDATE Memo SET body=?, time=? WHERE sender_id=? AND recipient_id", this.Body, this.Time, this.Sender_id, this.Recipient_id)
 	if err != nil {
 		//Do nothing
 	}
@@ -53,7 +52,7 @@ func (this *Memo) MemoDelete() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("DELETE FROM Memo WHERE Memo.sender_id=? AND Memo.recipient_id=?", this.sender_id, this.recipient_id)
+	rows, err := db.Query("DELETE FROM Memo WHERE Memo.sender_id=? AND Memo.recipient_id=?", this.Sender_id, this.Recipient_id)
 	if err != nil {
 		ret = false
 	}
