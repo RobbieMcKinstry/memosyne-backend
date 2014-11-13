@@ -9,12 +9,12 @@ import (
 )
 
 type User struct {
-	phone_num  string
-	email      string
-	first_name string
-	last_name  string
-	user_id    int
-	password   string
+	Phone_num  string
+	Email      string
+	First_name string
+	Last_name  string
+	User_id    int
+	Password   string
 }
 
 type Memo struct {

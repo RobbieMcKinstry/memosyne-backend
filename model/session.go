@@ -14,7 +14,7 @@ func SessionNew(email string, pass string) *Session {
 	var newSession *Session
 	var sid int
 	curUser := GetUserByEmail(db, email)
-	if pass != curUser.password {
+	if pass != curUser.Password {
 		//return error
 	} else {
 		//generate session id
@@ -26,7 +26,7 @@ func SessionNew(email string, pass string) *Session {
 			newSession = nil
 		}
 		sid = sid + 1
-		newSession = &Session{sid, "02 Jan 15 15:04 -0700", curUser.user_id}
+		newSession = &Session{sid, "02 Jan 15 15:04 -0700", curUser.User_id}
 	}
 	newSession.SessionAdd()
 	return newSession

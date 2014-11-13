@@ -8,8 +8,11 @@ func UserNew(p_num int, email string, f_name string, l_name string, pass string)
 	var newUser *User
 	var uid int
 	rows, err := db.Query("SELECT MAX(user_id) FROM User")
+	if err != nil {
+		newUser = nil
+	}
 	for rows.Next() {
-		_ = rows.Scan(&uid)
+		err = rows.Scan(&uid)
 	}
 	if err != nil {
 		newUser = nil
@@ -25,7 +28,7 @@ func (this *User) UserAdd() bool {
 	ret := true
 	db := Db_connect()
 
-	result, err := db.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", this.phone_num, this.email, this.first_name, this.last_name, this.user_id, this.password)
+	result, err := db.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", this.Phone_num, this.Email, this.First_name, this.Last_name, this.User_id, this.Password)
 	result.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -40,7 +43,7 @@ func (this *User) UserAdd() bool {
 func (this *User) UserSave() {
 	db := Db_connect()
 
-	result, err := db.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", this.user_id, this.first_name, this.last_name, this.email, this.password, this.phone_num)
+	result, err := db.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", this.User_id, this.First_name, this.Last_name, this.Email, this.Password, this.Phone_num)
 	result.Close()
 	if err != nil {
 		//Do nothing
@@ -51,7 +54,7 @@ func (this *User) UserSave() {
 func (this *User) UserDelete() bool {
 	ret := true
 	db := Db_connect()
-	result, err := db.Query("DELETE FROM User WHERE User.phone_num=?", this.phone_num)
+	result, err := db.Query("DELETE FROM User WHERE User.phone_num=?", this.Phone_num)
 	if err != nil {
 		ret = false
 	}
@@ -62,12 +65,12 @@ func (this *User) UserDelete() bool {
 
 func (this *User) equals(externalUser *User) bool {
 	ret := false
-	if externalUser.phone_num == this.phone_num &&
-		externalUser.first_name == this.first_name &&
-		externalUser.last_name == this.last_name &&
-		externalUser.user_id == this.user_id &&
-		externalUser.password == this.password &&
-		externalUser.email == this.email {
+	if externalUser.Phone_num == this.Phone_num &&
+		externalUser.First_name == this.First_name &&
+		externalUser.Last_name == this.Last_name &&
+		externalUser.User_id == this.User_id &&
+		externalUser.Password == this.Password &&
+		externalUser.Email == this.Email {
 		ret = true
 	}
 	return ret
