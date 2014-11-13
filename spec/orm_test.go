@@ -44,7 +44,7 @@ var _ = Describe("ORM", func() {
 				Last_name:  "McKinstry",
 				Password:   "foobar",
 			}
-			user = orm.SaveUser(user)
+			orm.SaveUser(user)
 			It("should have an ID", func() {
 				Expect(user.User_id).NotTo(Equal(0))
 			})
@@ -55,9 +55,35 @@ var _ = Describe("ORM", func() {
 				Expiration: time.Now().UTC().Format(time.RubyDate),
 				User_id:    1,
 			}
-			session = orm.SaveSession(session)
+			orm.SaveSession(session)
 			It("should have an ID", func() {
 				Expect(session.Session_id).NotTo(Equal(0))
+			})
+		})
+
+		Context("and I try to make a new memo object", func() {
+			memo := &Memo{
+				Sender_id: 1,
+				Recipient_id: 2,
+				Body: "Jenny please! I love you!",
+				Time: time.Now().UTC().Format(time.RubyDate),
+			}
+			orm.SaveMemo(memo)
+			PIt("should have an ID", func() {
+				// Need to include a memo id to be able to delete individual memos
+			})
+		})
+
+		Context("and I try to make a new contact object", func() {
+			contact := &Contact{
+				Phone_num: "412-445-3171",
+				Status: 2,
+				First_name: "Robbie",
+				Last_name: "McKinstry",
+			}
+			orm.SaveContact(contact)
+			PIt("should have an ID", func() {
+				// TODO implement
 			})
 		})
 
