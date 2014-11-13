@@ -38,9 +38,9 @@ type Contact_reference struct {
 }
 
 type Session struct {
-	session_id int
-	expiration string
-	user_id    int
+	Session_id int
+	Expiration string
+	User_id    int
 }
 
 func Db_connect() *sql.DB {

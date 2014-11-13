@@ -6,8 +6,6 @@ import (
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-/*---------- Session Methods ----------*/
-
 //Make new session
 func SessionNew(email string, pass string) *Session {
 	db := Db_connect()
@@ -37,7 +35,7 @@ func (this *Session) SessionAdd() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("INSERT INTO Session VALUES (?, ?, ?)", this.session_id, this.expiration, this.user_id)
+	rows, err := db.Query("INSERT INTO Session VALUES (?, ?, ?)", this.Session_id, this.Expiration, this.User_id)
 	if err != nil {
 		ret = false
 	}
@@ -49,7 +47,7 @@ func (this *Session) SessionAdd() bool {
 //Save changes to session
 func (this *Session) SessionSave() {
 	db := Db_connect()
-	rows, err := db.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", this.expiration, this.user_id, this.session_id)
+	rows, err := db.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", this.Expiration, this.User_id, this.Session_id)
 	if err != nil {
 		//Do nothing
 	}
@@ -61,7 +59,7 @@ func (this *Session) SessionDelete() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("DELETE FROM Session WHERE Session.session_id=?", this.session_id)
+	rows, err := db.Query("DELETE FROM Session WHERE Session.session_id=?", this.Session_id)
 	if err != nil {
 		ret = false
 	}
@@ -73,7 +71,7 @@ func (this *Session) SessionDelete() bool {
 func (this *Session) IsValid() bool {
 	ret := false
 
-	session_time, _ := time.Parse(time.RFC822Z, this.expiration)
+	session_time, _ := time.Parse(time.RFC822Z, this.Expiration)
 
 	if session_time.After(time.Now()) == true {
 		ret = true

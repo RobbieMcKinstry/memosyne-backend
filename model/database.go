@@ -30,7 +30,7 @@ type ormDelegate struct {
 // TODO use the connection string...
 func NewORM(connectionString string) (ORM, error) {
 
-	db, err := sql.Open("sqlite3", "sqlite.db")
+	db, err := sql.Open("sqlite3", connectionString)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
 	sessionSQL := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
 
-	tables := []string{ contactSQL, userSQL, contactReferenceSQL, memoSQL, sessionSQL }
+	tables := []string{contactSQL, userSQL, contactReferenceSQL, memoSQL, sessionSQL}
 	for _, tableSQL := range tables {
 		result := orm.CreateTableFromString(tableSQL)
 		if !result {
@@ -125,7 +125,30 @@ func (orm *ormDelegate) findIDFromTable(idName, tableName string) int {
 	return result
 }
 
-func (orm *ormDelegate) SaveSession(session *Session) *Session { return session }
+func (orm *ormDelegate) SaveSession(session *Session) *Session {
+	if session.Session_id == 0 {
+		session = orm.newSession(session)
+	} else {
+		rows, err := orm.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", session.Expiration, session.User_id, session.Session_id)
+		if err != nil {
+			log.Println(err)
+		}
+		defer rows.Close()
+	}
+	return session
+}
+
+func (orm *ormDelegate) newSession(session *Session) *Session {
+	id := orm.findIDFromTable("session_id", "Session")
+	session.Session_id = id
+
+	rows, err := orm.Query("INSERT INTO Session VALUES (?, ?, ?)", session.Session_id, session.Expiration, session.User_id)
+	if err != nil {
+		log.Println(err)
+	}
+	rows.Close()
+	return session
+}
 
 func (orm *ormDelegate) DeleteContact(contact *Contact) error { return nil }
 func (orm *ormDelegate) DeleteMemo(memo *Memo) error          { return nil }
