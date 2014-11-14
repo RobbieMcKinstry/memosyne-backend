@@ -1,3 +1,5 @@
 github.com/mxk/go-sqlite/sqlite3
 github.com/gorilla/mux
 github.com/carlosdp/twiliogo
+github.com/onsi/ginkgo/ginkgo
+github.com/onsi/gomega

@@ -1,34 +1,35 @@
-package api
+package model
 
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/mxk/go-sqlite/sqlite3"
 	"time"
+
+	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
 type User struct {
-	phone_num  string
-	email      string
-	first_name string
-	last_name  string
-	user_id    int
-	password   string
+	Phone_num  string
+	Email      string
+	First_name string
+	Last_name  string
+	User_id    int
+	Password   string
 }
 
 type Memo struct {
-	sender_id    int
-	recipient_id int
-	body         string
-	time         string
+	Sender_id    int
+	Recipient_id int
+	Body         string
+	Time         string
 }
 
 type Contact struct {
-	cid        int
-	phone_num  string
-	status     int
-	first_name string
-	last_name  string
+	Cid        int
+	Phone_num  string
+	Status     int
+	First_name string
+	Last_name  string
 }
 
 type Contact_reference struct {
@@ -37,9 +38,9 @@ type Contact_reference struct {
 }
 
 type Session struct {
-	session_id int
-	expiration string
-	user_id    int
+	Session_id int
+	Expiration string
+	User_id    int
 }
 
 func Db_connect() *sql.DB {
@@ -111,7 +112,7 @@ func Create_Session_table(connection *sql.DB) bool {
 	return true
 }
 
-func Create_tables(connection *sql.DB) bool {
+func CreateTables(connection *sql.DB) bool {
 	if connection == nil {
 		return false
 	}
@@ -221,7 +222,7 @@ func GetUserByPhone(phone, connection *sql.DB) *User {
 	return ret
 }
 
-func GetUserByEmail(e_mail, connection *sql.DB) *User {
+func GetUserByEmail(connection *sql.DB, e_mail string) *User {
 	rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE email=?", e_mail)
 	if err != nil {
 		fmt.Println(err)
@@ -319,7 +320,6 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 
 	var count int
 	for rows.Next() {
-		p
 		err = rows.Scan(&count)
 	}
 
@@ -393,9 +393,9 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 		return nil
 	}
 
-	ret := &Contact{contact_id, p_num, f_name, l_name, stat}
+	//ret := &Contact{contact_id, p_num, f_name, l_name, stat}
 
-	return ret
+	return new(Contact) // TODO implement a patch!
 }
 
 func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
@@ -438,7 +438,7 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 	return ret
 }
 
-func GetContactsByUserID(user_id int) []*Contacts {
+func GetContactsByUserID(user_id int) []*Contact {
 	db := Db_connect()
 	//contactCount, err := db.Query("SELECT COUNT(*) FROM Contact")
 	contacts, err := db.Query("SELECT * FROM Contact,Contact_Reference WHERE Contact_Reference.contact_ref=? AND Contact_Reference.contact_id=Contact.cid", user_id)
@@ -447,7 +447,7 @@ func GetContactsByUserID(user_id int) []*Contacts {
 	}
 
 	var contactPointerList []*Contact
-	contactPointerList = make([]*Contact, len(contacts))
+	contactPointerList = make([]*Contact, 0)
 
 	defer contacts.Close()
 	for contacts.Next() {
@@ -461,7 +461,7 @@ func GetContactsByUserID(user_id int) []*Contacts {
 
 		err = contacts.Scan(&theCid, &thePhoneNum, &theFirstName, &theLastName, &theStatus)
 
-		newContactObj := &Contact{theCid, thePhoneNum, theFirstName, theLastName, theStatus}
+		//newContactObj = &Contact{theCid, thePhoneNum, theFirstName, theLastName, theStatus} // TODO implement a patch
 
 		contactPointerList = append(contactPointerList, newContactObj)
 	}
@@ -475,14 +475,14 @@ func GetContactsByUserID(user_id int) []*Contacts {
 */
 func GetMemosWithinRange(date1 string, date2 string) []*Memo {
 
-	db = Db_connect()
+	db := Db_connect()
 	memos, err := db.Query("SELECT * FROM Memos")
 	if err != nil {
 		fmt.Println(err)
 	}
 
 	var memosWithinRange []*Memo
-	memosWithinRange = make([]*Memo, len(memos))
+	memosWithinRange = make([]*Memo, 0)
 
 	defer memos.Close()
 	for memos.Next() {
@@ -491,7 +491,7 @@ func GetMemosWithinRange(date1 string, date2 string) []*Memo {
 		var theBody string
 		var theTime time.Time
 
-		err = memos.Scan(
+		_ = memos.Scan(
 			&theSenderId,
 			&theRecipientId,
 			&theBody,
@@ -499,25 +499,25 @@ func GetMemosWithinRange(date1 string, date2 string) []*Memo {
 		)
 
 		//func Parse(layout, value string) (Time, error)
-		res := Parse(Time.RFC822Z, theTime)
+		//res := Parse(Time.RFC822Z, theTime)
 
 		//func (t Time) After(u Time) bool
-		if res.Before(date1) && res.After(date2) {
-			memoObj := &Memo{
-				theSenderId,
-				theRecipientId,
-				theBody,
-				theTime,
-			}
-			memosWithinRange = append(memosWithinRange, memoObj)
-		}
+		//if res.Before(date1) && res.After(date2) {
+		//	memoObj := &Memo{
+		//		theSenderId,
+		//		theRecipientId,
+		//		theBody,
+		//		theTime,
+		//	}
+		//	memosWithinRange = append(memosWithinRange, memoObj)
+		//}
 	}
 	db.Close()
 	return memosWithinRange
 }
 
 /* returns a dynamically allocated slice containing pointers to Memo objects related to the userID passed */
-func GetMemosByUserID(uid int) []*Memos {
+func GetMemosByUserID(uid int) []*Memo {
 	db := Db_connect()
 
 	memos, err := db.Query("SELECT * FROM Memos")
@@ -525,8 +525,8 @@ func GetMemosByUserID(uid int) []*Memos {
 		fmt.Println(err)
 	}
 
-	var memoPointerList []*Memos
-	memoPointerList = make([]*Memo, len(memos))
+	var memoPointerList []*Memo
+	memoPointerList = make([]*Memo, 0)
 
 	defer memos.Close()
 	for memos.Next() {
@@ -539,7 +539,7 @@ func GetMemosByUserID(uid int) []*Memos {
 		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
 
 		if theSenderId == uid {
-			newMemObj := &Memo(theSenderId, theRecipientId, theBody, theTime)
+			newMemoObj := &Memo{theSenderId, theRecipientId, theBody, theTime}
 			memoPointerList = append(memoPointerList, newMemoObj)
 		}
 	}
@@ -548,7 +548,7 @@ func GetMemosByUserID(uid int) []*Memos {
 }
 
 /* returns a dynamically allocated slice containing pointers to Memo objects */
-func GetMemos() []*Memos {
+func GetMemos() []*Memo {
 	db := Db_connect()
 
 	memos, err := db.Query("SELECT * FROM Memos")
@@ -556,8 +556,8 @@ func GetMemos() []*Memos {
 		fmt.Println(err)
 	}
 
-	var memoPointerList []*Memos
-	memoPointerList = make([]*Memo, len(memos))
+	var memoPointerList []*Memo
+	memoPointerList = make([]*Memo, 0)
 
 	defer memos.Close()
 	for memos.Next() {
@@ -569,7 +569,7 @@ func GetMemos() []*Memos {
 
 		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
 
-		newMemObj := &Memo(theSenderId, theRecipientId, theBody, theTime)
+		newMemoObj := &Memo{theSenderId, theRecipientId, theBody, theTime}
 		memoPointerList = append(memoPointerList, newMemoObj)
 	}
 
@@ -578,5 +578,5 @@ func GetMemos() []*Memos {
 }
 
 func main() {
-	Create_tables(Db_connect())
+	CreateTables(Db_connect())
 }
