@@ -3,6 +3,10 @@ language: go
 go:
    - 1.3
 
+before_install:
+   - go get github.com/nitrous-io/goop
+   - go install github.com/nitrous-io/goop
+
 install: 
    - goop install
 
