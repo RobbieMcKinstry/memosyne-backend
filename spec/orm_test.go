@@ -82,8 +82,8 @@ var _ = Describe("ORM", func() {
 				Last_name: "McKinstry",
 			}
 			orm.SaveContact(contact)
-			PIt("should have an ID", func() {
-				// TODO implement
+			It("should have an ID", func() {
+        Expect(contact.Cid).NotTo(BeZero())
 			})
 		})
 
