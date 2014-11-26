@@ -24,7 +24,7 @@ func SessionNew(email string, pass string) *Session {
 			newSession = nil
 		}
 		sid = sid + 1
-		newSession = &Session{sid, time.Now(), curUser.UserId}
+		newSession = &Session{sid, time.Now().AddDate(1, 0, 0), curUser.UserId}
 	}
 	newSession.SessionAdd()
 	return newSession
