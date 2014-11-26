@@ -24,7 +24,7 @@ func SessionNew(email string, pass string) *Session {
 			newSession = nil
 		}
 		sid = sid + 1
-		newSession = &Session{sid, "02 Jan 15 15:04 -0700", curUser.UserId}
+		newSession = &Session{sid, time.Now(), curUser.UserId}
 	}
 	newSession.SessionAdd()
 	return newSession
@@ -71,7 +71,7 @@ func (this *Session) SessionDelete() bool {
 func (this *Session) IsValid() bool {
 	ret := false
 
-	session_time, _ := time.Parse(time.RFC822Z, this.Expiration)
+	session_time := this.Expiration
 
 	if session_time.After(time.Now()) == true {
 		ret = true
@@ -79,5 +79,3 @@ func (this *Session) IsValid() bool {
 
 	return ret
 }
-
-/*---------- END SESSIONS ----------*/
