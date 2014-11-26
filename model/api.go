@@ -9,27 +9,27 @@ import (
 )
 
 type User struct {
-	Phone_num  string
+	PhoneNum  string
 	Email      string
-	First_name string
-	Last_name  string
-	User_id    int
+	FirstName string
+	LastName  string
+	UserId    int
 	Password   string
 }
 
 type Memo struct {
-	Sender_id    int
-	Recipient_id int
+	SenderId    int
+	RecipientId int
 	Body         string
 	Time         string
 }
 
 type Contact struct {
-	Cid        int
-	Phone_num  string
+	ContactId        int
+	PhoneNum  string
 	Status     int
-	First_name string
-	Last_name  string
+	FirstName string
+	LastName  string
 }
 
 type Contact_reference struct {
@@ -38,9 +38,9 @@ type Contact_reference struct {
 }
 
 type Session struct {
-	Session_id int
+	SessionId int
 	Expiration string
-	User_id    int
+	UserId    int
 }
 
 func Db_connect() *sql.DB {

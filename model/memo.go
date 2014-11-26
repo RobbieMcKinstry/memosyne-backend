@@ -29,7 +29,7 @@ func (this *Memo) MemoAdd() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("INSERT INTO Memo VALUES (?, ?, ?, ?)", this.Sender_id, this.Recipient_id, this.Body, this.Time)
+	rows, err := db.Query("INSERT INTO Memo VALUES (?, ?, ?, ?)", this.SenderId, this.RecipientId, this.Body, this.Time)
 	if err != nil {
 		ret = false
 	}
@@ -41,7 +41,7 @@ func (this *Memo) MemoAdd() bool {
 /* Saves contact data to db */
 func (this *Memo) MemoSave() {
 	db := Db_connect()
-	rows, err := db.Query("UPDATE Memo SET body=?, time=? WHERE sender_id=? AND recipient_id", this.Body, this.Time, this.Sender_id, this.Recipient_id)
+	rows, err := db.Query("UPDATE Memo SET body=?, time=? WHERE sender_id=? AND recipient_id", this.Body, this.Time, this.SenderId, this.RecipientId)
 	if err != nil {
 		//Do nothing
 	}
@@ -52,7 +52,7 @@ func (this *Memo) MemoDelete() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("DELETE FROM Memo WHERE Memo.sender_id=? AND Memo.recipient_id=?", this.Sender_id, this.Recipient_id)
+	rows, err := db.Query("DELETE FROM Memo WHERE Memo.sender_id=? AND Memo.recipient_id=?", this.SenderId, this.RecipientId)
 	if err != nil {
 		ret = false
 	}
@@ -60,5 +60,3 @@ func (this *Memo) MemoDelete() bool {
 
 	return ret
 }
-
-/*---------- MEMOS END ----------*/
