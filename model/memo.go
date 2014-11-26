@@ -1,10 +1,12 @@
 package model
 
 import (
+	"time"
+
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-func MemoNew(sid int, rid int, b string, t string) *Memo {
+func MemoNew(sid int, rid int, b string, t time.Time) *Memo {
 	newMemo := &Memo{sid, rid, b, t}
 
 	db := Db_connect()

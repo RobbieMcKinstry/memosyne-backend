@@ -52,7 +52,7 @@ var _ = Describe("ORM", func() {
 
 		Context("and I try to make a new session object", func() {
 			session := &Session{
-				Expiration: time.Now().UTC().Format(time.RubyDate),
+				Expiration: time.Now().UTC(),
 				UserId:    1,
 			}
 			orm.SaveSession(session)
@@ -66,7 +66,7 @@ var _ = Describe("ORM", func() {
 				SenderId: 1,
 				RecipientId: 2,
 				Body: "Jenny please! I love you!",
-				Time: time.Now().UTC().Format(time.RubyDate),
+				Time: time.Now().UTC(),
 			}
 			orm.SaveMemo(memo)
 			PIt("should have an ID", func() {

@@ -37,7 +37,7 @@ func NewORM(connectionString string) (ORM, error) {
 
 	result := &ormDelegate{db}
 	passed := result.CreateTablesIfNotExist()
-	if ! passed {
+	if !passed {
 		log.Println("Failed to create new tables.")
 	}
 	return result, nil
@@ -49,8 +49,8 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 	contactSQL := "CREATE TABLE IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, 'first_name' TEXT, 'last_name' TEXT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
 	userSQL := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
 	contactReferenceSQL := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
-	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
-	sessionSQL := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
+	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' INT NOT NULL, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
+	sessionSQL := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' INT NOT NULL, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
 
 	tables := []string{contactSQL, userSQL, contactReferenceSQL, memoSQL, sessionSQL}
 	for _, tableSQL := range tables {
@@ -71,30 +71,30 @@ func (orm *ormDelegate) CreateTableFromString(creationSQL string) bool {
 	}
 	return true
 }
-func (orm * ormDelegate) newContact(contact *Contact){
-  id := orm.findIDFromTable("cid", "Contact")
-  contact.ContactId = id
-  result, err := orm.Query("INSERT INTO Contact VALUES(?,?,?,?,?)", contact.ContactId,contact.PhoneNum,contact.Status,contact.FirstName,contact.LastName)
-  if err != nil {
-    log.Println(err)
-  }
-  result.Close()
+func (orm *ormDelegate) newContact(contact *Contact) {
+	id := orm.findIDFromTable("cid", "Contact")
+	contact.ContactId = id
+	result, err := orm.Query("INSERT INTO Contact VALUES(?,?,?,?,?)", contact.ContactId, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName)
+	if err != nil {
+		log.Println(err)
+	}
+	result.Close()
 }
 
 func (orm *ormDelegate) SaveContact(contact *Contact) *Contact {
-  if contact.ContactId == 0{
-    orm.newContact(contact)  
-  } else{
-    result,err := orm.Query("UPDATE Contact SET Contact.phone_num=?, Contact.status=?, Contact.first_name=?, Contact.last_name=? WHERE Contact.cid = ?",)
-    if err != nil{
-      log.Println(err)
-    }
-    result.Close()
-  }
-  
-  return contact
+	if contact.ContactId == 0 {
+		orm.newContact(contact)
+	} else {
+		result, err := orm.Query("UPDATE Contact SET Contact.phone_num=?, Contact.status=?, Contact.first_name=?, Contact.last_name=? WHERE Contact.cid = ?")
+		if err != nil {
+			log.Println(err)
+		}
+		result.Close()
+	}
+
+	return contact
 }
-func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo       { return memo }
+func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo { return memo }
 func (orm *ormDelegate) SaveUser(user *User) *User {
 	if user.UserId == 0 {
 		orm.newUser(user)

@@ -10,24 +10,24 @@ import (
 
 type User struct {
 	PhoneNum  string
-	Email      string
+	Email     string
 	FirstName string
 	LastName  string
 	UserId    int
-	Password   string
+	Password  string
 }
 
 type Memo struct {
 	SenderId    int
 	RecipientId int
-	Body         string
-	Time         string
+	Body        string
+	Time        time.Time
 }
 
 type Contact struct {
-	ContactId        int
+	ContactId int
 	PhoneNum  string
-	Status     int
+	Status    int
 	FirstName string
 	LastName  string
 }
@@ -38,9 +38,9 @@ type Contact_reference struct {
 }
 
 type Session struct {
-	SessionId int
-	Expiration string
-	UserId    int
+	SessionId  int
+	Expiration time.Time
+	UserId     int
 }
 
 func Db_connect() *sql.DB {
@@ -159,7 +159,7 @@ func GetSessionByID(id int, connection *sql.DB) *Session {
 	}
 
 	var s_id int
-	var expr string
+	var expr time.Time
 	var u_id int
 
 	defer rows.Close()
@@ -337,7 +337,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 	var send_id int
 	var recip_id int
 	var message_body string
-	var message_time string
+	var message_time time.Time
 
 	defer rows.Close()
 	for rows.Next() {
@@ -534,7 +534,7 @@ func GetMemosByUserID(uid int) []*Memo {
 		var theSenderId int
 		var theRecipientId int
 		var theBody string
-		var theTime string
+		var theTime time.Time
 
 		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
 
@@ -565,7 +565,7 @@ func GetMemos() []*Memo {
 		var theSenderId int
 		var theRecipientId int
 		var theBody string
-		var theTime string
+		var theTime time.Time
 
 		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
 
