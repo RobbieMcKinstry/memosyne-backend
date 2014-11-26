@@ -56,6 +56,7 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 	for _, tableSQL := range tables {
 		result := orm.CreateTableFromString(tableSQL)
 		if !result {
+			log.Println("Failed to intialize all of the tables.")
 			return false
 		}
 	}
@@ -63,33 +64,40 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 }
 
 func (orm *ormDelegate) CreateTableFromString(creationSQL string) bool {
-	rows, err := orm.Query(creationSQL)
-	rows.Close()
+
+	stmt, err := orm.Prepare(creationSQL)
 	if err != nil {
 		log.Println(err)
 		return false
 	}
+	execInTransaction(orm, stmt)
 	return true
 }
+
 func (orm *ormDelegate) newContact(contact *Contact) {
 	id := orm.findIDFromTable("cid", "Contact")
 	contact.ContactId = id
-	result, err := orm.Query("INSERT INTO Contact VALUES(?,?,?,?,?)", contact.ContactId, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName)
+
+	stmt, err := orm.Prepare("INSERT INTO contact VALUES(?,?,?,?,?)")
+	defer stmt.Close()
 	if err != nil {
 		log.Println(err)
+		return
 	}
-	result.Close()
+	execInTransaction(orm, stmt, contact.ContactId, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName)
 }
 
 func (orm *ormDelegate) SaveContact(contact *Contact) *Contact {
 	if contact.ContactId == 0 {
 		orm.newContact(contact)
 	} else {
-		result, err := orm.Query("UPDATE Contact SET Contact.phone_num=?, Contact.status=?, Contact.first_name=?, Contact.last_name=? WHERE Contact.cid = ?")
+		stmt, err := orm.Prepare("UPDATE Contact SET Contact.phone_num=?, Contact.status=?, Contact.first_name=?, Contact.last_name=? WHERE Contact.cid = ?")
+		defer stmt.Close()
 		if err != nil {
 			log.Println(err)
+			return contact
 		}
-		result.Close()
+		execInTransaction(orm, stmt, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName, contact.ContactId)
 	}
 
 	return contact
@@ -99,11 +107,13 @@ func (orm *ormDelegate) SaveUser(user *User) *User {
 	if user.UserId == 0 {
 		orm.newUser(user)
 	} else {
-		result, err := orm.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", user.UserId, user.FirstName, user.LastName, user.Email, user.Password, user.PhoneNum)
+		stmt, err := orm.Prepare("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?")
+		defer stmt.Close()
 		if err != nil {
 			log.Println(err)
+			return user
 		}
-		defer result.Close()
+		execInTransaction(orm, stmt, user.UserId, user.FirstName, user.LastName, user.Email, user.Password, user.PhoneNum)
 	}
 	return user
 }
@@ -111,11 +121,15 @@ func (orm *ormDelegate) SaveUser(user *User) *User {
 func (orm *ormDelegate) newUser(user *User) {
 	id := orm.findIDFromTable("user_id", "User")
 	user.UserId = id
-	result, err := orm.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", user.PhoneNum, user.Email, user.FirstName, user.LastName, user.UserId, user.Password)
+
+	stmt, err := orm.Prepare("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)")
+	defer stmt.Close()
 	if err != nil {
 		log.Println(err)
+		return
 	}
-	result.Close()
+
+	execInTransaction(orm, stmt, user.PhoneNum, user.Email, user.FirstName, user.LastName, user.UserId, user.Password)
 }
 
 func (orm *ormDelegate) findIDFromTable(idName, tableName string) int {
@@ -153,11 +167,13 @@ func (orm *ormDelegate) SaveSession(session *Session) *Session {
 	if session.SessionId == 0 {
 		session = orm.newSession(session)
 	} else {
-		rows, err := orm.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", session.Expiration, session.UserId, session.SessionId)
+		stmt, err := orm.Prepare("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?")
+		defer stmt.Close()
 		if err != nil {
 			log.Println(err)
+			return session
 		}
-		defer rows.Close()
+		execInTransaction(orm, stmt, session.Expiration, session.UserId, session.SessionId)
 	}
 	return session
 }
@@ -166,11 +182,14 @@ func (orm *ormDelegate) newSession(session *Session) *Session {
 	id := orm.findIDFromTable("session_id", "Session")
 	session.SessionId = id
 
-	rows, err := orm.Query("INSERT INTO Session VALUES (?, ?, ?)", session.SessionId, session.Expiration, session.UserId)
+	stmt, err := orm.Prepare("INSERT INTO Session VALUES (?, ?, ?)")
+	defer stmt.Close()
 	if err != nil {
 		log.Println(err)
+		return session
 	}
-	rows.Close()
+	execInTransaction(orm, stmt, session.SessionId, session.Expiration, session.UserId)
+
 	return session
 }
 
@@ -178,3 +197,27 @@ func (orm *ormDelegate) DeleteContact(contact *Contact) error { return nil }
 func (orm *ormDelegate) DeleteMemo(memo *Memo) error          { return nil }
 func (orm *ormDelegate) DeleteUser(user *User) error          { return nil }
 func (orm *ormDelegate) DeleteSession(session *Session) error { return nil }
+
+func execInTransaction(orm *ormDelegate, stmt *sql.Stmt, args ...interface{}) {
+	var (
+		err   error
+		tx    *sql.Tx
+		valid bool
+	)
+	tx, err = orm.Begin()
+	valid = !rollbackOnErr(err, tx)
+
+	_, err = tx.Stmt(stmt).Exec(args...)
+	valid = valid && !rollbackOnErr(err, tx)
+	if valid {
+		tx.Commit()
+	}
+}
+
+func rollbackOnErr(err error, tx *sql.Tx) bool {
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+	}
+	return err != nil
+}
