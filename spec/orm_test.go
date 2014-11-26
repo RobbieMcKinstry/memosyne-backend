@@ -38,33 +38,33 @@ var _ = Describe("ORM", func() {
 		Context("and I try and make a new user object", func() {
 
 			user := &User{
-				Phone_num:  "412-445-3171",
+				PhoneNum:  "412-445-3171",
 				Email:      "thesnowmancometh@gmail.com",
-				First_name: "Robbie",
-				Last_name:  "McKinstry",
+				FirstName: "Robbie",
+				LastName:  "McKinstry",
 				Password:   "foobar",
 			}
 			orm.SaveUser(user)
 			It("should have an ID", func() {
-				Expect(user.User_id).NotTo(Equal(0))
+				Expect(user.UserId).NotTo(Equal(0))
 			})
 		})
 
 		Context("and I try to make a new session object", func() {
 			session := &Session{
 				Expiration: time.Now().UTC().Format(time.RubyDate),
-				User_id:    1,
+				UserId:    1,
 			}
 			orm.SaveSession(session)
 			It("should have an ID", func() {
-				Expect(session.Session_id).NotTo(Equal(0))
+				Expect(session.SessionId).NotTo(Equal(0))
 			})
 		})
 
 		Context("and I try to make a new memo object", func() {
 			memo := &Memo{
-				Sender_id: 1,
-				Recipient_id: 2,
+				SenderId: 1,
+				RecipientId: 2,
 				Body: "Jenny please! I love you!",
 				Time: time.Now().UTC().Format(time.RubyDate),
 			}
@@ -76,14 +76,14 @@ var _ = Describe("ORM", func() {
 
 		Context("and I try to make a new contact object", func() {
 			contact := &Contact{
-				Phone_num: "412-445-3171",
+				PhoneNum: "412-445-3171",
 				Status: 2,
-				First_name: "Robbie",
-				Last_name: "McKinstry",
+				FirstName: "Robbie",
+				LastName: "McKinstry",
 			}
 			orm.SaveContact(contact)
 			It("should have an ID", func() {
-        Expect(contact.Cid).NotTo(BeZero())
+        Expect(contact.ContactId).NotTo(BeZero())
 			})
 		})
 

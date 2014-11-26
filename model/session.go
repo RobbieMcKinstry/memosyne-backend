@@ -24,7 +24,7 @@ func SessionNew(email string, pass string) *Session {
 			newSession = nil
 		}
 		sid = sid + 1
-		newSession = &Session{sid, "02 Jan 15 15:04 -0700", curUser.User_id}
+		newSession = &Session{sid, "02 Jan 15 15:04 -0700", curUser.UserId}
 	}
 	newSession.SessionAdd()
 	return newSession
@@ -35,7 +35,7 @@ func (this *Session) SessionAdd() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("INSERT INTO Session VALUES (?, ?, ?)", this.Session_id, this.Expiration, this.User_id)
+	rows, err := db.Query("INSERT INTO Session VALUES (?, ?, ?)", this.SessionId, this.Expiration, this.UserId)
 	if err != nil {
 		ret = false
 	}
@@ -47,7 +47,7 @@ func (this *Session) SessionAdd() bool {
 //Save changes to session
 func (this *Session) SessionSave() {
 	db := Db_connect()
-	rows, err := db.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", this.Expiration, this.User_id, this.Session_id)
+	rows, err := db.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", this.Expiration, this.UserId, this.SessionId)
 	if err != nil {
 		//Do nothing
 	}
@@ -59,7 +59,7 @@ func (this *Session) SessionDelete() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("DELETE FROM Session WHERE Session.session_id=?", this.Session_id)
+	rows, err := db.Query("DELETE FROM Session WHERE Session.session_id=?", this.SessionId)
 	if err != nil {
 		ret = false
 	}

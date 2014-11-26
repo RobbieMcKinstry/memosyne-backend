@@ -25,7 +25,7 @@ func (this *Contact) ContactAdd() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("INSERT INTO Contact VALUES (?, ?, ?, ?, ?)", this.Cid, this.Phone_num, this.Status, this.First_name, this.Last_name)
+	rows, err := db.Query("INSERT INTO Contact VALUES (?, ?, ?, ?, ?)", this.ContactId, this.PhoneNum, this.Status, this.FirstName, this.LastName)
 	if err != nil {
 		ret = false
 	}
@@ -38,7 +38,7 @@ func (this *Contact) ContactDelete() bool {
 	ret := true
 	db := Db_connect()
 
-	rows, err := db.Query("DELETE FROM Contact WHERE Contact.cid=?", this.Cid)
+	rows, err := db.Query("DELETE FROM Contact WHERE Contact.cid=?", this.ContactId)
 	if err != nil {
 		ret = false
 	}
@@ -50,7 +50,7 @@ func (this *Contact) ContactDelete() bool {
 /* Saves contact data to db */
 func (this *Contact) ContactSave() {
 	db := Db_connect()
-	rows, err := db.Query("UPDATE Session SET phone_num=?, status=?,first_name=?,last_name=? WHERE cid=?", this.Phone_num, this.Status, this.First_name, this.Last_name, this.Cid)
+	rows, err := db.Query("UPDATE Session SET phone_num=?, status=?,first_name=?,last_name=? WHERE cid=?", this.PhoneNum, this.Status, this.FirstName, this.LastName, this.ContactId)
 	if err != nil {
 		//Do nothing
 	}

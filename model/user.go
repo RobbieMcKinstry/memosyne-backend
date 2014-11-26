@@ -28,7 +28,7 @@ func (this *User) UserAdd() bool {
 	ret := true
 	db := Db_connect()
 
-	result, err := db.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", this.Phone_num, this.Email, this.First_name, this.Last_name, this.User_id, this.Password)
+	result, err := db.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", this.PhoneNum, this.Email, this.FirstName, this.LastName, this.UserId, this.Password)
 	result.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -43,7 +43,7 @@ func (this *User) UserAdd() bool {
 func (this *User) UserSave() {
 	db := Db_connect()
 
-	result, err := db.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", this.User_id, this.First_name, this.Last_name, this.Email, this.Password, this.Phone_num)
+	result, err := db.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", this.UserId, this.FirstName, this.LastName, this.Email, this.Password, this.PhoneNum)
 	result.Close()
 	if err != nil {
 		//Do nothing
@@ -54,7 +54,7 @@ func (this *User) UserSave() {
 func (this *User) UserDelete() bool {
 	ret := true
 	db := Db_connect()
-	result, err := db.Query("DELETE FROM User WHERE User.phone_num=?", this.Phone_num)
+	result, err := db.Query("DELETE FROM User WHERE User.phone_num=?", this.PhoneNum)
 	if err != nil {
 		ret = false
 	}
@@ -65,10 +65,10 @@ func (this *User) UserDelete() bool {
 
 func (this *User) equals(externalUser *User) bool {
 	ret := false
-	if externalUser.Phone_num == this.Phone_num &&
-		externalUser.First_name == this.First_name &&
-		externalUser.Last_name == this.Last_name &&
-		externalUser.User_id == this.User_id &&
+	if externalUser.PhoneNum == this.PhoneNum &&
+		externalUser.FirstName == this.FirstName &&
+		externalUser.LastName == this.LastName &&
+		externalUser.UserId == this.UserId &&
 		externalUser.Password == this.Password &&
 		externalUser.Email == this.Email {
 		ret = true

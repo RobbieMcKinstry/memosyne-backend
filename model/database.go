@@ -73,8 +73,8 @@ func (orm *ormDelegate) CreateTableFromString(creationSQL string) bool {
 }
 func (orm * ormDelegate) newContact(contact *Contact){
   id := orm.findIDFromTable("cid", "Contact")
-  contact.Cid = id
-  result, err := orm.Query("INSERT INTO Contact VALUES(?,?,?,?,?)", contact.Cid,contact.Phone_num,contact.Status,contact.First_name,contact.Last_name)
+  contact.ContactId = id
+  result, err := orm.Query("INSERT INTO Contact VALUES(?,?,?,?,?)", contact.ContactId,contact.PhoneNum,contact.Status,contact.FirstName,contact.LastName)
   if err != nil {
     log.Println(err)
   }
@@ -82,7 +82,7 @@ func (orm * ormDelegate) newContact(contact *Contact){
 }
 
 func (orm *ormDelegate) SaveContact(contact *Contact) *Contact {
-  if contact.Cid == 0{
+  if contact.ContactId == 0{
     orm.newContact(contact)  
   } else{
     result,err := orm.Query("UPDATE Contact SET Contact.phone_num=?, Contact.status=?, Contact.first_name=?, Contact.last_name=? WHERE Contact.cid = ?",)
@@ -96,10 +96,10 @@ func (orm *ormDelegate) SaveContact(contact *Contact) *Contact {
 }
 func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo       { return memo }
 func (orm *ormDelegate) SaveUser(user *User) *User {
-	if user.User_id == 0 {
+	if user.UserId == 0 {
 		orm.newUser(user)
 	} else {
-		result, err := orm.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", user.User_id, user.First_name, user.Last_name, user.Email, user.Password, user.Phone_num)
+		result, err := orm.Query("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?", user.UserId, user.FirstName, user.LastName, user.Email, user.Password, user.PhoneNum)
 		if err != nil {
 			log.Println(err)
 		}
@@ -110,8 +110,8 @@ func (orm *ormDelegate) SaveUser(user *User) *User {
 
 func (orm *ormDelegate) newUser(user *User) {
 	id := orm.findIDFromTable("user_id", "User")
-	user.User_id = id
-	result, err := orm.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", user.Phone_num, user.Email, user.First_name, user.Last_name, user.User_id, user.Password)
+	user.UserId = id
+	result, err := orm.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", user.PhoneNum, user.Email, user.FirstName, user.LastName, user.UserId, user.Password)
 	if err != nil {
 		log.Println(err)
 	}
@@ -150,10 +150,10 @@ func (orm *ormDelegate) findIDFromTable(idName, tableName string) int {
 }
 
 func (orm *ormDelegate) SaveSession(session *Session) *Session {
-	if session.Session_id == 0 {
+	if session.SessionId == 0 {
 		session = orm.newSession(session)
 	} else {
-		rows, err := orm.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", session.Expiration, session.User_id, session.Session_id)
+		rows, err := orm.Query("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?", session.Expiration, session.UserId, session.SessionId)
 		if err != nil {
 			log.Println(err)
 		}
@@ -164,9 +164,9 @@ func (orm *ormDelegate) SaveSession(session *Session) *Session {
 
 func (orm *ormDelegate) newSession(session *Session) *Session {
 	id := orm.findIDFromTable("session_id", "Session")
-	session.Session_id = id
+	session.SessionId = id
 
-	rows, err := orm.Query("INSERT INTO Session VALUES (?, ?, ?)", session.Session_id, session.Expiration, session.User_id)
+	rows, err := orm.Query("INSERT INTO Session VALUES (?, ?, ?)", session.SessionId, session.Expiration, session.UserId)
 	if err != nil {
 		log.Println(err)
 	}
