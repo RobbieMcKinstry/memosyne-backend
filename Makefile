@@ -10,4 +10,4 @@ test: clean
 	goop exec go test -v ./spec
 
 clean:
-	rm spec/phony.db
+	rm spec/phony.db || :
