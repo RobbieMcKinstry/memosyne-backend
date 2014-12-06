@@ -57,86 +57,6 @@ func Db_connect() *sql.DB {
 	return db
 }
 
-//create user table
-func Create_User_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Contact_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Contact_Reference_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Memo_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Session_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func CreateTables(connection *sql.DB) bool {
-	if connection == nil {
-		return false
-	}
-	if Create_User_table(connection) == false {
-		return false
-	}
-	if Create_Contact_Reference_table(connection) == false {
-		return false
-	}
-	if Create_Contact_table(connection) == false {
-		return false
-	}
-	if Create_Session_table(connection) == false {
-		return false
-	}
-	if Create_Memo_table(connection) == false {
-		return false
-	}
-	return true
-}
-
-/*---------- GetValuesFromDBByID ----------*/
-
 func GetSessionByID(id int, connection *sql.DB) *Session {
 	rows, err := connection.Query("SELECT COUNT(*) FROM Session WHERE session_id=?", id)
 	if err != nil {
@@ -583,8 +503,4 @@ func GetMemos() []*Memo {
 
 	db.Close()
 	return memoPointerList
-}
-
-func main() {
-	CreateTables(Db_connect())
 }
