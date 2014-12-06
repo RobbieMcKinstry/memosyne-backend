@@ -21,6 +21,8 @@ type ORM interface {
 	DeleteMemo(*Memo) error
 	DeleteUser(*User) error
 	DeleteSession(*Session) error
+
+	FindSessionByID(int) *Session
 }
 
 type ormDelegate struct {
