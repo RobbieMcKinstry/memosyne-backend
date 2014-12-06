@@ -8,42 +8,6 @@ import (
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-type User struct {
-	PhoneNum  string
-	Email     string
-	FirstName string
-	LastName  string
-	UserId    int
-	Password  string
-}
-
-type Memo struct {
-	ID          int
-	SenderId    int
-	RecipientId int
-	Body        string
-	Time        time.Time
-}
-
-type Contact struct {
-	ContactId int
-	PhoneNum  string
-	Status    int
-	FirstName string
-	LastName  string
-}
-
-type Contact_reference struct {
-	contact_ref int
-	contact_id  int
-}
-
-type Session struct {
-	SessionId  int
-	Expiration time.Time
-	UserId     int
-}
-
 func Db_connect() *sql.DB {
 	db, err := sql.Open("sqlite3", "sqlite.db")
 	if err != nil {

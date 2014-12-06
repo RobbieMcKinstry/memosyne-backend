@@ -2,6 +2,15 @@ package model
 
 import "fmt"
 
+type User struct {
+	PhoneNum  string
+	Email     string
+	FirstName string
+	LastName  string
+	UserId    int
+	Password  string
+}
+
 /* Makes new User */
 func UserNew(p_num int, email string, f_name string, l_name string, pass string) *User {
 	db := Db_connect()

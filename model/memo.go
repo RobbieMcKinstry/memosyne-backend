@@ -6,6 +6,14 @@ import (
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
+type Memo struct {
+	ID          int
+	SenderId    int
+	RecipientId int
+	Body        string
+	Time        time.Time
+}
+
 func MemoNew(id, sid, rid int, b string, t time.Time) *Memo {
 	newMemo := &Memo{id, sid, rid, b, t}
 
