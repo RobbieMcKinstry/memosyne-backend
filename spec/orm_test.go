@@ -20,6 +20,26 @@ func TestORM(t *testing.T) {
 }
 
 var _ = Describe("Utility Methods", func() {
+	Context("When working with a user", func() {
+		user := &User{
+			PhoneNum:  "412-445-3171",
+			Email:     "thesnowmancometh@gmail.com",
+			FirstName: "Robbie",
+			LastName:  "McKinstry",
+			Password:  "foobar",
+		}
+		It("should be equal to another user with the same credentials", func() {
+			other := &User{
+				PhoneNum:  "412-445-3171",
+				Email:     "thesnowmancometh@gmail.com",
+				FirstName: "Robbie",
+				LastName:  "McKinstry",
+				Password:  "foobar",
+			}
+			Expect(user.Equals(other)).To(BeTrue())
+		})
+	})
+
 	Context("When working with a session", func() {
 		t := time.Now()
 		session := &Session{
@@ -66,6 +86,11 @@ var _ = Describe("ORM", func() {
 			orm.SaveUser(user)
 			It("should have an ID", func() {
 				Expect(user.UserId).NotTo(Equal(0))
+			})
+
+			It("should be accessable by its ID", func() {
+				sameUser := orm.FindUserByID(user.UserId)
+				Expect(user.Equals(sameUser)).To(BeTrue(), "\nUser 1: %v\nUser 2: %v\n", user.ToString(), sameUser.ToString())
 			})
 		})
 

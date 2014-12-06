@@ -23,6 +23,7 @@ type ORM interface {
 	DeleteSession(*Session) error
 
 	FindSessionByID(int) *Session
+	FindUserByID(int) *User
 }
 
 type ormDelegate struct {

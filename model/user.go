@@ -11,6 +11,34 @@ type User struct {
 	Password  string
 }
 
+func (user *User) Equals(other *User) bool {
+	return user.PhoneNum == other.PhoneNum &&
+		user.Email == other.Email &&
+		user.FirstName == other.FirstName &&
+		user.LastName == other.LastName &&
+		user.UserId == other.UserId
+}
+
+func (orm *ormDelegate) FindUserByID(id int) *User {
+	stmt, err := orm.Prepare("SELECT user_id, email, phone_num, first_name, last_name, password FROM User WHERE user_id=?")
+	if err != nil {
+		fmt.Println(err)
+		return &User{}
+	}
+	row := stmt.QueryRow(id)
+	result := &User{}
+	err = row.Scan(&result.UserId, &result.Email, &result.PhoneNum, &result.FirstName, &result.LastName, &result.Password)
+	if err != nil {
+		fmt.Println(err)
+		return &User{}
+	}
+	return result
+}
+
+func (user *User) ToString() string {
+	return fmt.Sprintf("ID: %v, Email: %v, PhoneNum: %v, FirstName: %v, LastName: %v ", user.UserId, user.Email, user.PhoneNum, user.FirstName, user.LastName)
+}
+
 /* Makes new User */
 func UserNew(p_num int, email string, f_name string, l_name string, pass string) *User {
 	db := Db_connect()
