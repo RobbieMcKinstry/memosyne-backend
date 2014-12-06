@@ -18,6 +18,7 @@ type User struct {
 }
 
 type Memo struct {
+	ID          int
 	SenderId    int
 	RecipientId int
 	Body        string
@@ -334,6 +335,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 		fmt.Println(err)
 	}
 
+	var id int
 	var send_id int
 	var recip_id int
 	var message_body string
@@ -341,7 +343,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&send_id, &recip_id, &message_body, &message_time)
+		err = rows.Scan(&id, &send_id, &recip_id, &message_body, &message_time)
 	}
 
 	if err != nil {
@@ -349,7 +351,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 		return nil
 	}
 
-	ret := &Memo{send_id, recip_id, message_body, message_time}
+	ret := &Memo{id, send_id, recip_id, message_body, message_time}
 
 	return ret
 }
@@ -531,15 +533,18 @@ func GetMemosByUserID(uid int) []*Memo {
 	defer memos.Close()
 	for memos.Next() {
 
-		var theSenderId int
-		var theRecipientId int
-		var theBody string
-		var theTime time.Time
+		var (
+			id             int
+			theSenderId    int
+			theRecipientId int
+			theBody        string
+			theTime        time.Time
+		)
 
-		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
+		err = memos.Scan(&id, &theSenderId, &theRecipientId, &theBody, &theTime)
 
 		if theSenderId == uid {
-			newMemoObj := &Memo{theSenderId, theRecipientId, theBody, theTime}
+			newMemoObj := &Memo{id, theSenderId, theRecipientId, theBody, theTime}
 			memoPointerList = append(memoPointerList, newMemoObj)
 		}
 	}
@@ -562,14 +567,17 @@ func GetMemos() []*Memo {
 	defer memos.Close()
 	for memos.Next() {
 
-		var theSenderId int
-		var theRecipientId int
-		var theBody string
-		var theTime time.Time
+		var (
+			id             int
+			theSenderId    int
+			theRecipientId int
+			theBody        string
+			theTime        time.Time
+		)
 
-		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
+		err = memos.Scan(&id, &theSenderId, &theRecipientId, &theBody, &theTime)
 
-		newMemoObj := &Memo{theSenderId, theRecipientId, theBody, theTime}
+		newMemoObj := &Memo{id, theSenderId, theRecipientId, theBody, theTime}
 		memoPointerList = append(memoPointerList, newMemoObj)
 	}
 

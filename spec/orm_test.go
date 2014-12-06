@@ -39,10 +39,10 @@ var _ = Describe("ORM", func() {
 
 			user := &User{
 				PhoneNum:  "412-445-3171",
-				Email:      "thesnowmancometh@gmail.com",
+				Email:     "thesnowmancometh@gmail.com",
 				FirstName: "Robbie",
 				LastName:  "McKinstry",
-				Password:   "foobar",
+				Password:  "foobar",
 			}
 			orm.SaveUser(user)
 			It("should have an ID", func() {
@@ -53,7 +53,7 @@ var _ = Describe("ORM", func() {
 		Context("and I try to make a new session object", func() {
 			session := &Session{
 				Expiration: time.Now().UTC(),
-				UserId:    1,
+				UserId:     1,
 			}
 			orm.SaveSession(session)
 			It("should have an ID", func() {
@@ -63,27 +63,27 @@ var _ = Describe("ORM", func() {
 
 		Context("and I try to make a new memo object", func() {
 			memo := &Memo{
-				SenderId: 1,
+				SenderId:    1,
 				RecipientId: 2,
-				Body: "Jenny please! I love you!",
-				Time: time.Now().UTC(),
+				Body:        "Jenny please! I love you!",
+				Time:        time.Now().UTC(),
 			}
 			orm.SaveMemo(memo)
-			PIt("should have an ID", func() {
-				// Need to include a memo id to be able to delete individual memos
+			It("should have an ID", func() {
+				Expect(memo.ID).NotTo(BeZero())
 			})
 		})
 
 		Context("and I try to make a new contact object", func() {
 			contact := &Contact{
-				PhoneNum: "412-445-3171",
-				Status: 2,
+				PhoneNum:  "412-445-3171",
+				Status:    2,
 				FirstName: "Robbie",
-				LastName: "McKinstry",
+				LastName:  "McKinstry",
 			}
 			orm.SaveContact(contact)
 			It("should have an ID", func() {
-        Expect(contact.ContactId).NotTo(BeZero())
+				Expect(contact.ContactId).NotTo(BeZero())
 			})
 		})
 

@@ -6,8 +6,8 @@ import (
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-func MemoNew(sid int, rid int, b string, t time.Time) *Memo {
-	newMemo := &Memo{sid, rid, b, t}
+func MemoNew(id, sid, rid int, b string, t time.Time) *Memo {
+	newMemo := &Memo{id, sid, rid, b, t}
 
 	db := Db_connect()
 	rows, _ := db.Query("SELECT Contact.status FROM Contact, Contact_Reference WHERE Contact_Reference.contact_ref = ? AND Contact.cid = ? AND Contact.cid = Contact_Reference.contact_id;", sid, rid)
@@ -18,7 +18,7 @@ func MemoNew(sid int, rid int, b string, t time.Time) *Memo {
 		_ = rows.Scan(&contactstatus)
 	}
 	if contactstatus == 2 {
-		newMemo = &Memo{sid, rid, b, t}
+		newMemo = &Memo{id, sid, rid, b, t}
 		newMemo.MemoAdd()
 	} else {
 		newMemo = nil
