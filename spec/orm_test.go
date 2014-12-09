@@ -20,6 +20,27 @@ func TestORM(t *testing.T) {
 }
 
 var _ = Describe("Utility Methods", func() {
+	Context("When working with a memo", func() {
+		t := time.Now()
+		memo := &Memo{
+			ID:          1,
+			SenderId:    2,
+			RecipientId: 3,
+			Body:        "Jenny please! I love you!",
+			Time:        t,
+		}
+		It("should be equal to another memo with the same creddentials", func() {
+			memo2 := &Memo{
+				ID:          1,
+				SenderId:    2,
+				RecipientId: 3,
+				Body:        "Jenny please! I love you!",
+				Time:        t,
+			}
+			Expect(memo.Equals(memo2)).To(BeTrue(), "Memo 1:%v\nMemo 2: %v", memo.ToString(), memo2.ToString())
+		})
+	})
+
 	Context("When working with a user", func() {
 		user := &User{
 			PhoneNum:  "412-445-3171",
@@ -121,6 +142,12 @@ var _ = Describe("ORM", func() {
 			orm.SaveMemo(memo)
 			It("should have an ID", func() {
 				Expect(memo.ID).NotTo(BeZero())
+			})
+
+			It("should be able to be found by it's ID.", func() {
+				id := memo.ID
+				fromDB := orm.FindMemoByID(id)
+				Expect(memo.Equals(fromDB)).To(BeTrue(), "\nMemo 1: %v\nMemo 2: %v", memo.ToString(), fromDB.ToString())
 			})
 		})
 

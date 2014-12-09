@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	_ "github.com/mxk/go-sqlite/sqlite3"
@@ -12,6 +13,37 @@ type Memo struct {
 	RecipientId int
 	Body        string
 	Time        time.Time
+}
+
+func (memo *Memo) Equals(other *Memo) bool {
+	return memo.ID == other.ID &&
+		memo.SenderId == other.SenderId &&
+		memo.RecipientId == other.RecipientId &&
+		memo.Body == other.Body &&
+		memo.Time.Equal(other.Time)
+}
+
+func (orm *ormDelegate) FindMemoByID(id int) *Memo {
+	var dbTime int64
+
+	stmt, err := orm.Prepare("SELECT id, sender_id, recipient_id, body, time FROM Memo WHERE id=?")
+	if err != nil {
+		fmt.Println(err)
+		return &Memo{}
+	}
+	row := stmt.QueryRow(id)
+	result := &Memo{}
+	err = row.Scan(&result.ID, &result.SenderId, &result.RecipientId, &result.Body, &dbTime)
+	if err != nil {
+		fmt.Println(err)
+		return &Memo{}
+	}
+	result.Time = time.Unix(dbTime, 0)
+	return result
+}
+
+func (memo *Memo) ToString() string {
+	return fmt.Sprintf("Memo [ID: %v, Sender: %v, Recipient: %v, Time: %v, Body: %v ]", memo.ID, memo.SenderId, memo.RecipientId, memo.Time.Format(time.RFC822), memo.Body)
 }
 
 func MemoNew(id, sid, rid int, b string, t time.Time) *Memo {
