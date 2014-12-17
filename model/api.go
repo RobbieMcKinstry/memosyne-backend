@@ -35,7 +35,7 @@ func GetSessionByID(id int, connection *sql.DB) *Session {
 		err = rows.Scan(&count)
 	}
 
-	fmt.Println(count)
+	log.Println(count)
 
 	if count == 0 {
 		return nil
@@ -76,7 +76,7 @@ func GetUserByPhone(phone, connection *sql.DB) *User {
 		err = rows.Scan(&count)
 	}
 
-	fmt.Println(count)
+	log.Println(count)
 
 	if count == 0 {
 		return nil
@@ -121,7 +121,7 @@ func GetUserByEmail(connection *sql.DB, e_mail string) *User {
 		err = rows.Scan(&count)
 	}
 
-	fmt.Println(count)
+	log.Println(count)
 
 	if count == 0 {
 		return nil
@@ -166,7 +166,7 @@ func GetUserByID(id, connection *sql.DB) *User {
 		err = rows.Scan(&count)
 	}
 
-	fmt.Println(count)
+	log.Println(count)
 
 	if count == 0 {
 		return nil
@@ -211,7 +211,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 		err = rows.Scan(&count)
 	}
 
-	fmt.Println(count)
+	log.Println(count)
 
 	if count == 0 {
 		return nil
@@ -255,7 +255,7 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 		err = rows.Scan(&count)
 	}
 
-	fmt.Println(count)
+	log.Println(count)
 
 	if count == 0 {
 		return nil
@@ -298,7 +298,7 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 		err = rows.Scan(&count)
 	}
 
-	fmt.Println(count)
+	log.Println(count)
 
 	if count == 0 {
 		return nil

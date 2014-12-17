@@ -2,12 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
 	"os"
 	"time"
 
 	twilio "github.com/carlosdp/twiliogo"
+	"github.com/Sirupsen/logrus"
 )
 
 /*
@@ -15,6 +14,8 @@ AllMemosByTime(time.Time, time.Time)
 AllMemos()
 SendMemo()
 */
+
+var log = logrus.New()
 
 func main() {
 	var demo bool
@@ -70,8 +71,8 @@ func SendMemo(memo *Memo) {
 	client := twilio.NewClient(sid, auth)
 	message, err := twilio.NewMessage(client, "4124453191", "6238504947", twilio.Body("Hello World!"))
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	} else {
-		fmt.Println(message.Status)
+		log.Println(message.Status)
 	}
 }

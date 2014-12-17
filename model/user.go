@@ -1,6 +1,8 @@
 package model
 
-import "fmt"
+import (
+    "github.com/Sirupsen/logrus"
+)
 
 type User struct {
 	PhoneNum  string
@@ -10,6 +12,8 @@ type User struct {
 	UserId    int
 	Password  string
 }
+
+var log = logrus.New()
 
 /* Makes new User */
 func UserNew(p_num int, email string, f_name string, l_name string, pass string) *User {
@@ -40,7 +44,7 @@ func (this *User) UserAdd() bool {
 	result, err := db.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", this.PhoneNum, this.Email, this.FirstName, this.LastName, this.UserId, this.Password)
 	result.Close()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		ret = false
 	}
 
@@ -93,7 +97,7 @@ func (this *User) GetContacts() []*Contact {
     //contactCount, err := db.Query("SELECT COUNT(*) FROM Contact")
     contacts, err := db.Query("SELECT * FROM Contact")
     if err != nil {
-        fmt.Println(err)
+        log.Println(err)
     }
 
     var contactPointerList []*Contact
@@ -129,7 +133,7 @@ func (this *User) GetMemos() []*Memos {
 
     memos, err := db.Query("SELECT * FROM Memos")
     if err != nil {
-        fmt.Println(err)
+        log.Println(err)
     }
 
     var memoPointerList []*Memos
