@@ -2,11 +2,13 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 
 	"fmt"
 	"net/http"
 )
+
+var log = logrus.New();
 
 func main() {
 	log.Println("Hello Memosyne")
