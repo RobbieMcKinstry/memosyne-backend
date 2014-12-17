@@ -3,3 +3,4 @@ github.com/gorilla/mux
 github.com/carlosdp/twiliogo
 github.com/onsi/ginkgo/ginkgo
 github.com/onsi/gomega
+github.com/Sirupsen/logrus

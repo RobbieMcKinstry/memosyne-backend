@@ -1,9 +1,5 @@
 package model
 
-import (
-    "github.com/Sirupsen/logrus"
-)
-
 type User struct {
 	PhoneNum  string
 	Email     string
@@ -12,8 +8,6 @@ type User struct {
 	UserId    int
 	Password  string
 }
-
-var log = logrus.New()
 
 /* Makes new User */
 func UserNew(p_num int, email string, f_name string, l_name string, pass string) *User {
