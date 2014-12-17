@@ -1,5 +1,19 @@
 package model
 
+type Contact struct {
+	ContactId int
+	PhoneNum  string
+	Status    int
+	FirstName string
+	LastName  string
+}
+
+type Contact_reference struct {
+	contact_ref int
+	contact_id  int
+}
+
+
 func ContactNew(user_id int, p_num string, first_name string, last_name string) *Contact {
 	ret := true
 	db := Db_connect()

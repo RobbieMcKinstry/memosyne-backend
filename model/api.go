@@ -8,41 +8,6 @@ import (
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-type User struct {
-	PhoneNum  string
-	Email     string
-	FirstName string
-	LastName  string
-	UserId    int
-	Password  string
-}
-
-type Memo struct {
-	SenderId    int
-	RecipientId int
-	Body        string
-	Time        time.Time
-}
-
-type Contact struct {
-	ContactId int
-	PhoneNum  string
-	Status    int
-	FirstName string
-	LastName  string
-}
-
-type Contact_reference struct {
-	contact_ref int
-	contact_id  int
-}
-
-type Session struct {
-	SessionId  int
-	Expiration time.Time
-	UserId     int
-}
-
 func Db_connect() *sql.DB {
 	db, err := sql.Open("sqlite3", "sqlite.db")
 	if err != nil {
@@ -55,86 +20,6 @@ func Db_connect() *sql.DB {
 	rows.Close()
 	return db
 }
-
-//create user table
-func Create_User_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Contact_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Contact_Reference_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Memo_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' TEXT, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func Create_Session_table(connection *sql.DB) bool {
-	createString := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' TEXT, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
-	rows, err := connection.Query(createString)
-	rows.Close()
-	if err != nil {
-		fmt.Println(err)
-		return false
-	}
-	return true
-}
-
-func CreateTables(connection *sql.DB) bool {
-	if connection == nil {
-		return false
-	}
-	if Create_User_table(connection) == false {
-		return false
-	}
-	if Create_Contact_Reference_table(connection) == false {
-		return false
-	}
-	if Create_Contact_table(connection) == false {
-		return false
-	}
-	if Create_Session_table(connection) == false {
-		return false
-	}
-	if Create_Memo_table(connection) == false {
-		return false
-	}
-	return true
-}
-
-/*---------- GetValuesFromDBByID ----------*/
 
 func GetSessionByID(id int, connection *sql.DB) *Session {
 	rows, err := connection.Query("SELECT COUNT(*) FROM Session WHERE session_id=?", id)
@@ -334,6 +219,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 		fmt.Println(err)
 	}
 
+	var id int
 	var send_id int
 	var recip_id int
 	var message_body string
@@ -341,7 +227,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 
 	defer rows.Close()
 	for rows.Next() {
-		err = rows.Scan(&send_id, &recip_id, &message_body, &message_time)
+		err = rows.Scan(&id, &send_id, &recip_id, &message_body, &message_time)
 	}
 
 	if err != nil {
@@ -349,7 +235,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 		return nil
 	}
 
-	ret := &Memo{send_id, recip_id, message_body, message_time}
+	ret := &Memo{id, send_id, recip_id, message_body, message_time}
 
 	return ret
 }
@@ -531,15 +417,18 @@ func GetMemosByUserID(uid int) []*Memo {
 	defer memos.Close()
 	for memos.Next() {
 
-		var theSenderId int
-		var theRecipientId int
-		var theBody string
-		var theTime time.Time
+		var (
+			id             int
+			theSenderId    int
+			theRecipientId int
+			theBody        string
+			theTime        time.Time
+		)
 
-		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
+		err = memos.Scan(&id, &theSenderId, &theRecipientId, &theBody, &theTime)
 
 		if theSenderId == uid {
-			newMemoObj := &Memo{theSenderId, theRecipientId, theBody, theTime}
+			newMemoObj := &Memo{id, theSenderId, theRecipientId, theBody, theTime}
 			memoPointerList = append(memoPointerList, newMemoObj)
 		}
 	}
@@ -562,21 +451,20 @@ func GetMemos() []*Memo {
 	defer memos.Close()
 	for memos.Next() {
 
-		var theSenderId int
-		var theRecipientId int
-		var theBody string
-		var theTime time.Time
+		var (
+			id             int
+			theSenderId    int
+			theRecipientId int
+			theBody        string
+			theTime        time.Time
+		)
 
-		err = memos.Scan(&theSenderId, &theRecipientId, &theBody, &theTime)
+		err = memos.Scan(&id, &theSenderId, &theRecipientId, &theBody, &theTime)
 
-		newMemoObj := &Memo{theSenderId, theRecipientId, theBody, theTime}
+		newMemoObj := &Memo{id, theSenderId, theRecipientId, theBody, theTime}
 		memoPointerList = append(memoPointerList, newMemoObj)
 	}
 
 	db.Close()
 	return memoPointerList
-}
-
-func main() {
-	CreateTables(Db_connect())
 }

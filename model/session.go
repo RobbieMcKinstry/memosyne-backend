@@ -6,6 +6,12 @@ import (
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
+type Session struct {
+	SessionId  int
+	Expiration time.Time
+	UserId     int
+}
+
 //Make new session
 func SessionNew(email string, pass string) *Session {
 	db := Db_connect()

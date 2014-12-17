@@ -49,7 +49,7 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 	contactSQL := "CREATE TABLE IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, 'first_name' TEXT, 'last_name' TEXT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
 	userSQL := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
 	contactReferenceSQL := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
-	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' INT NOT NULL, FOREIGN KEY(sender_id) REFERENCES User(user_id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
+	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('id' INT NOT NULL, 'sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' INT NOT NULL, FOREIGN KEY(sender_id) REFERENCES User(user_id), PRIMARY KEY(id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
 	sessionSQL := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' INT NOT NULL, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
 
 	tables := []string{contactSQL, userSQL, contactReferenceSQL, memoSQL, sessionSQL}
@@ -102,7 +102,34 @@ func (orm *ormDelegate) SaveContact(contact *Contact) *Contact {
 
 	return contact
 }
-func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo { return memo }
+func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo {
+	if memo.ID == 0 {
+		orm.newMemo(memo)
+	} else {
+		stmt, err := orm.Prepare("UPDATE Memo SET Memo.sender_id=?, Memo.recipient_id=?, body=?, time=? WHERE Memo.id=?")
+		defer stmt.Close()
+		if err != nil {
+			log.Println(err)
+			return memo
+		}
+		execInTransaction(orm, stmt, memo.SenderId, memo.RecipientId, memo.Body, memo.Time, memo.ID)
+	}
+
+	return memo
+
+}
+
+func (orm *ormDelegate) newMemo(memo *Memo) {
+	id := orm.findIDFromTable("id", "Memo")
+	memo.ID = id
+	stmt, err := orm.Prepare("INSERT INTO Memo ('id', 'sender_id', 'recipient_id', 'body', 'time') VALUES (?, ?, ?, ?, ?)")
+	defer stmt.Close()
+	if err != nil {
+		log.Println(err)
+	}
+	execInTransaction(orm, stmt, memo.ID, memo.SenderId, memo.RecipientId, memo.Body, memo.Time)
+}
+
 func (orm *ormDelegate) SaveUser(user *User) *User {
 	if user.UserId == 0 {
 		orm.newUser(user)
