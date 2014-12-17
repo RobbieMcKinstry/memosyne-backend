@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	log "github.com/Sirupsen/logrus"
 
 	"fmt"
-	"log"
 	"net/http"
 )
 
