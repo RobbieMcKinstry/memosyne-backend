@@ -3,7 +3,6 @@ package model
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )

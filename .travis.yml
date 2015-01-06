@@ -17,5 +17,6 @@ notifications:
    email:
      recipients:
        - thesnowmancometh@gmail.com
+       - insomniac34@gmail.com
      on_success: always     
      on_failure: always
