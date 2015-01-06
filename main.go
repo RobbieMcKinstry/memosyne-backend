@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-var logger = logrus.New();
+var logger = logrus.New()
 
 func main() {
 	logger.Println("Hello Memosyne")
