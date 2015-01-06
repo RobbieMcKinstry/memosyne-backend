@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 
+	logger "github.com/Sirupsen/logrus"
+
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
@@ -25,8 +27,6 @@ type ORM interface {
 type ormDelegate struct {
 	*sql.DB
 }
-
-var logger = logrus.New()
 
 // TODO use the connection string...
 func NewORM(connectionString string) (ORM, error) {

@@ -1,5 +1,7 @@
 package model
 
+import logger "github.com/Sirupsen/logrus"
+
 type User struct {
 	PhoneNum  string
 	Email     string

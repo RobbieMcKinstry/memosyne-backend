@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	logger "github.com/Sirupsen/logrus"
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-var logger = logrus.New()
+
 
 func Db_connect() *sql.DB {
 	db, err := sql.Open("sqlite3", "sqlite.db")
