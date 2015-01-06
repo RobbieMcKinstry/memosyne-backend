@@ -1,17 +1,18 @@
 package main
 
 import (
+	logger "github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	"github.com/Sirupsen/logrus"
+
+	"./model"
 
 	"fmt"
 	"net/http"
+	"strconv"
 )
 
-var log = logrus.New();
-
 func main() {
-	log.Println("Hello Memosyne")
+	logger.Println("Hello Memosyne")
 
 	r := mux.NewRouter()
 	r.HandleFunc("/sessions/{id}", HandleSessionRead).Methods("GET")
@@ -28,42 +29,33 @@ func main() {
 	r.HandleFunc("/", HandleHelloWorld)
 	http.Handle("/", r)
 
-	log.Println("Now listening on port 8080")
+	logger.Println("Now listening on port 8080")
 	http.ListenAndServe(":8080", nil)
 }
 
-
 func HandleSessionRead(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	sessionId := vars["id"]
+	sessionID, _ := strconv.Atoi(vars["id"])
 
-	output := fmt.Sprintf("Hello, session %v", sessionId)
-	_ = output
+	orm, err := model.NewORM("development.db")
+	if err != nil {
+		logger.Println(err)
+	}
+	var session *model.Session = orm.FindSessionByID(sessionID)
+	_ = session
 
-	s := `{ "session_id": 120, }`
+	s := fmt.Sprintf(`{ "session_id": %v, }`, session)
+
 	w.Write([]byte(s))
 }
 
-
 func HandleSessionCreate(w http.ResponseWriter, r *http.Request) {
-	/* TODO get the json out of the request.
-	{
-		"user": {
-			"phone_number": "412-445-3171",
-			"password":     "foobar",
-		}
-	}
-	*/
-	// TODO make a new session in the db. Get back its id
-	// return that id
-
 	s := `{
 		"session_id": 29,
 		"user_id":    120,
 	}`
 	w.Write([]byte(s))
 }
-
 
 func HandleContactsRead(w http.ResponseWriter, r *http.Request) {
 	s := `{
@@ -83,7 +75,6 @@ func HandleContactsRead(w http.ResponseWriter, r *http.Request) {
 	}`
 	w.Write([]byte(s))
 }
-
 
 func HandleMemoRead(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -144,9 +135,8 @@ func HandleUserCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(s))
 }
 
-
 func HandleMemoCreate(w http.ResponseWriter, r *http.Request) {
-	s :=` {
+	s := ` {
 		"memos": {
 			"sender_id": 7,
 			"contact_id": 99,
@@ -157,9 +147,7 @@ func HandleMemoCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(s))
 }
 
-
 func HandleContactsCreate(w http.ResponseWriter, r *http.Request) {
-	// TODO implement
 	s := `{
 		“contact”: { 
 			“contact_id”: 3,
@@ -171,7 +159,6 @@ func HandleContactsCreate(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte(s))
 }
-
 
 func HandleHelloWorld(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello, Memosyne!"))
