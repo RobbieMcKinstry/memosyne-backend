@@ -1,5 +1,8 @@
 package model
 
+import logger "github.com/Sirupsen/logrus"
+import "fmt"
+
 type User struct {
 	PhoneNum  string
 	Email     string
@@ -20,14 +23,14 @@ func (user *User) Equals(other *User) bool {
 func (orm *ormDelegate) FindUserByID(id int) *User {
 	stmt, err := orm.Prepare("SELECT user_id, email, phone_num, first_name, last_name, password FROM User WHERE user_id=?")
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return &User{}
 	}
 	row := stmt.QueryRow(id)
 	result := &User{}
 	err = row.Scan(&result.UserId, &result.Email, &result.PhoneNum, &result.FirstName, &result.LastName, &result.Password)
 	if err != nil {
-		fmt.Println(err)
+		logger.Println(err)
 		return &User{}
 	}
 	return result
