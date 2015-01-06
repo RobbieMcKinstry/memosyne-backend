@@ -26,6 +26,8 @@ type ormDelegate struct {
 	*sql.DB
 }
 
+var logger = logrus.New()
+
 // TODO use the connection string...
 func NewORM(connectionString string) (ORM, error) {
 
@@ -37,7 +39,7 @@ func NewORM(connectionString string) (ORM, error) {
 	result := &ormDelegate{db}
 	passed := result.CreateTablesIfNotExist()
 	if !passed {
-		log.Println("Failed to create new tables.")
+		logger.Println("Failed to create new tables.")
 	}
 	return result, nil
 }
@@ -55,7 +57,7 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 	for _, tableSQL := range tables {
 		result := orm.CreateTableFromString(tableSQL)
 		if !result {
-			log.Println("Failed to intialize all of the tables.")
+			logger.Println("Failed to intialize all of the tables.")
 			return false
 		}
 	}
@@ -66,7 +68,7 @@ func (orm *ormDelegate) CreateTableFromString(creationSQL string) bool {
 
 	stmt, err := orm.Prepare(creationSQL)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return false
 	}
 	execInTransaction(orm, stmt)
@@ -80,7 +82,7 @@ func (orm *ormDelegate) newContact(contact *Contact) {
 	stmt, err := orm.Prepare("INSERT INTO contact VALUES(?,?,?,?,?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return
 	}
 	execInTransaction(orm, stmt, contact.ContactId, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName)
@@ -93,7 +95,7 @@ func (orm *ormDelegate) SaveContact(contact *Contact) *Contact {
 		stmt, err := orm.Prepare("UPDATE Contact SET Contact.phone_num=?, Contact.status=?, Contact.first_name=?, Contact.last_name=? WHERE Contact.cid = ?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return contact
 		}
 		execInTransaction(orm, stmt, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName, contact.ContactId)
@@ -108,7 +110,7 @@ func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo {
 		stmt, err := orm.Prepare("UPDATE Memo SET Memo.sender_id=?, Memo.recipient_id=?, body=?, time=? WHERE Memo.id=?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return memo
 		}
 		execInTransaction(orm, stmt, memo.SenderId, memo.RecipientId, memo.Body, memo.Time, memo.ID)
@@ -124,7 +126,7 @@ func (orm *ormDelegate) newMemo(memo *Memo) {
 	stmt, err := orm.Prepare("INSERT INTO Memo ('id', 'sender_id', 'recipient_id', 'body', 'time') VALUES (?, ?, ?, ?, ?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 	execInTransaction(orm, stmt, memo.ID, memo.SenderId, memo.RecipientId, memo.Body, memo.Time)
 }
@@ -136,7 +138,7 @@ func (orm *ormDelegate) SaveUser(user *User) *User {
 		stmt, err := orm.Prepare("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return user
 		}
 		execInTransaction(orm, stmt, user.UserId, user.FirstName, user.LastName, user.Email, user.Password, user.PhoneNum)
@@ -151,7 +153,7 @@ func (orm *ormDelegate) newUser(user *User) {
 	stmt, err := orm.Prepare("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return
 	}
 
@@ -162,27 +164,27 @@ func (orm *ormDelegate) findIDFromTable(idName, tableName string) int {
 	result := 1
 	rows, err := orm.Query(fmt.Sprintf("SELECT COUNT(*) FROM %v", tableName))
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
 	for rows.Next() {
 		err = rows.Scan(&count)
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 		}
 	}
 	if count != 0 {
 		var uid int
 		rows, err = orm.Query(fmt.Sprintf("SELECT MAX(%v) FROM %v", idName, tableName))
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 		}
 		for rows.Next() {
 			err = rows.Scan(&uid)
 		}
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 		}
 		result = uid + 1
 	}
@@ -196,7 +198,7 @@ func (orm *ormDelegate) SaveSession(session *Session) *Session {
 		stmt, err := orm.Prepare("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return session
 		}
 		execInTransaction(orm, stmt, session.Expiration, session.UserId, session.SessionId)
@@ -211,7 +213,7 @@ func (orm *ormDelegate) newSession(session *Session) *Session {
 	stmt, err := orm.Prepare("INSERT INTO Session VALUES (?, ?, ?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return session
 	}
 	execInTransaction(orm, stmt, session.SessionId, session.Expiration, session.UserId)
@@ -242,7 +244,7 @@ func execInTransaction(orm *ormDelegate, stmt *sql.Stmt, args ...interface{}) {
 
 func rollbackOnErr(err error, tx *sql.Tx) bool {
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		tx.Rollback()
 	}
 	return err != nil

@@ -38,7 +38,7 @@ func (this *User) UserAdd() bool {
 	result, err := db.Query("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)", this.PhoneNum, this.Email, this.FirstName, this.LastName, this.UserId, this.Password)
 	result.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		ret = false
 	}
 
@@ -91,7 +91,7 @@ func (this *User) GetContacts() []*Contact {
     //contactCount, err := db.Query("SELECT COUNT(*) FROM Contact")
     contacts, err := db.Query("SELECT * FROM Contact")
     if err != nil {
-        log.Println(err)
+        logger.Println(err)
     }
 
     var contactPointerList []*Contact
@@ -127,7 +127,7 @@ func (this *User) GetMemos() []*Memos {
 
     memos, err := db.Query("SELECT * FROM Memos")
     if err != nil {
-        log.Println(err)
+        logger.Println(err)
     }
 
     var memoPointerList []*Memos
