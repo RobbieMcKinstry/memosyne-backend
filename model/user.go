@@ -1,5 +1,8 @@
 package model
 
+import logger "github.com/Sirupsen/logrus"
+import "fmt"
+
 type User struct {
 	PhoneNum  string
 	Email     string
@@ -7,6 +10,34 @@ type User struct {
 	LastName  string
 	UserId    int
 	Password  string
+}
+
+func (user *User) Equals(other *User) bool {
+	return user.PhoneNum == other.PhoneNum &&
+		user.Email == other.Email &&
+		user.FirstName == other.FirstName &&
+		user.LastName == other.LastName &&
+		user.UserId == other.UserId
+}
+
+func (orm *ormDelegate) FindUserByID(id int) *User {
+	stmt, err := orm.Prepare("SELECT user_id, email, phone_num, first_name, last_name, password FROM User WHERE user_id=?")
+	if err != nil {
+		logger.Println(err)
+		return &User{}
+	}
+	row := stmt.QueryRow(id)
+	result := &User{}
+	err = row.Scan(&result.UserId, &result.Email, &result.PhoneNum, &result.FirstName, &result.LastName, &result.Password)
+	if err != nil {
+		logger.Println(err)
+		return &User{}
+	}
+	return result
+}
+
+func (user *User) ToString() string {
+	return fmt.Sprintf("ID: %v, Email: %v, PhoneNum: %v, FirstName: %v, LastName: %v ", user.UserId, user.Email, user.PhoneNum, user.FirstName, user.LastName)
 }
 
 /* Makes new User */

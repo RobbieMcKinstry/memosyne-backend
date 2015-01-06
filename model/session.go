@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	_ "github.com/mxk/go-sqlite/sqlite3"
@@ -10,6 +11,40 @@ type Session struct {
 	SessionId  int
 	Expiration time.Time
 	UserId     int
+}
+
+func (s1 *Session) Equals(s2 *Session) bool {
+	return (s1.Expiration.Equal(s2.Expiration)) && (s1.UserId == s2.UserId)
+}
+
+func (session *Session) ToString() string {
+	return fmt.Sprintf("ID: %v, User ID, %v, Expiration: %v", session.SessionId, session.UserId, session.Expiration)
+}
+
+// TODO really need to abstract this out into a function that works for any kind of table
+// TODO look into the Scan function for this
+func (orm *ormDelegate) FindSessionByID(id int) *Session {
+
+	var dbTime int64
+
+	stmt, err := orm.Prepare("SELECT session_id, user_id, expiration FROM Session WHERE session_id=?")
+	if err != nil {
+		fmt.Println(err)
+		return &Session{}
+	}
+	row := stmt.QueryRow(id)
+	result := &Session{}
+	err = row.Scan(&result.SessionId, &result.UserId, &dbTime)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	result.Expiration = time.Unix(dbTime, 0)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return result
 }
 
 //Make new session
