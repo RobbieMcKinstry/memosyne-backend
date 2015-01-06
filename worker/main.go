@@ -6,7 +6,7 @@ import (
 	"time"
 
 	twilio "github.com/carlosdp/twiliogo"
-	"github.com/Sirupsen/logrus"
+	logger "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -14,8 +14,6 @@ AllMemosByTime(time.Time, time.Time)
 AllMemos()
 SendMemo()
 */
-
-var logger = logrus.New()
 
 func main() {
 	var demo bool
