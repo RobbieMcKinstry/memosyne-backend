@@ -33,13 +33,20 @@ func NewORM(connectionString string) (ORM, error) {
 
 	db, err := sql.Open("sqlite3", connectionString)
 	if err != nil {
+		logger.WithFields(logger.Fields{
+			"db_uri": connectionString,
+			"db_error":true,
+		}).Error(err)
 		return nil, err
 	}
 
 	result := &ormDelegate{db}
 	passed := result.CreateTablesIfNotExist()
 	if !passed {
-		logger.Println("Failed to create new tables.")
+		logger.WithFields(logger.Fields{
+			"db_uri": connectionString,
+			"db_error":true,
+		}).Error("Failed to create new tables.")
 	}
 	return result, nil
 }
@@ -57,7 +64,7 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 	for _, tableSQL := range tables {
 		result := orm.CreateTableFromString(tableSQL)
 		if !result {
-			logger.Println("Failed to intialize all of the tables.")
+			logger.WithFields(logger.Fields{"orm_connected":orm.IsConnected(),"db_error":true,}).Error("Failed to intialize all of the tables.")
 			return false
 		}
 	}
