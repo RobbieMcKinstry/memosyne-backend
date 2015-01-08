@@ -3,9 +3,7 @@ package model
 import (
 	"database/sql"
 	"fmt"
-
 	logger "github.com/Sirupsen/logrus"
-
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
@@ -54,26 +52,30 @@ func NewORM(connectionString string) (ORM, error) {
 func (orm *ormDelegate) IsConnected() bool { return orm.Ping() == nil }
 
 func (orm *ormDelegate) CreateTablesIfNotExist() bool {
-	contactSQL := "CREATE TABLE IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, 'first_name' TEXT, 'last_name' TEXT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
-	userSQL := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
-	contactReferenceSQL := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
-	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('id' INT NOT NULL, 'sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' INT NOT NULL, FOREIGN KEY(sender_id) REFERENCES User(user_id), PRIMARY KEY(id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
-	sessionSQL := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' INT NOT NULL, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
+	contactSQL := "IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, 'first_name' TEXT, 'last_name' TEXT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
+	userSQL := "IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
+	contactReferenceSQL := "IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
+	memoSQL := "IF NOT EXISTS 'Memo' ('id' INT NOT NULL, 'sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' INT NOT NULL, FOREIGN KEY(sender_id) REFERENCES User(user_id), PRIMARY KEY(id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
+	sessionSQL := "IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' INT NOT NULL, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
 
 	tables := []string{contactSQL, userSQL, contactReferenceSQL, memoSQL, sessionSQL}
-	for _, tableSQL := range tables {
+	for index, tableSQL := range tables {
 		result := orm.CreateTableFromString(tableSQL)
 		if !result {
-			logger.WithFields(logger.Fields{"orm_connected":orm.IsConnected(),"db_error":true,}).Error("Failed to intialize all of the tables.")
+			logger.WithFields(logger.Fields{"orm_connected":orm.IsConnected(),"statement":index,"db_error":true,}).Error("Failed to intialize all of the tables.")
 			return false
 		}
 	}
 	return true
 }
 
+//CreateTableFromString accepts a partial SQL statement
+//beginning with an optional "IF NOT EXISTS"
+//followed by the table name and columns. Essentially all it does is append
+//"CREATE TABLE " (note the space) to the start of the string
+//It then prepares and executes the statement in a transaction.
 func (orm *ormDelegate) CreateTableFromString(creationSQL string) bool {
-
-	stmt, err := orm.Prepare(creationSQL)
+	stmt, err := orm.Prepare("CREATE TABLE " + creationSQL)
 	if err != nil {
 		logger.Println(err)
 		return false
