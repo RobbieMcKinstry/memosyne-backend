@@ -77,7 +77,7 @@ func (orm *ormDelegate) CreateTablesIfNotExist() bool {
 func (orm *ormDelegate) CreateTableFromString(creationSQL string) bool {
 	stmt, err := orm.Prepare("CREATE TABLE " + creationSQL)
 	if err != nil {
-		logger.Println(err)
+		logger.WithFields(logger.Fields{"orm_connected":orm.IsConnected(),"db_error":true,}).Error(err)
 		return false
 	}
 	execInTransaction(orm, stmt)
