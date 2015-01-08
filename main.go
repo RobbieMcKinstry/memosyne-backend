@@ -42,7 +42,6 @@ func HandleSessionRead(w http.ResponseWriter, r *http.Request) {
 		logger.Println(err)
 	}
 	var session *model.Session = orm.FindSessionByID(sessionID)
-	_ = session
 
 	s := fmt.Sprintf(`{ "session_id": %v, }`, session)
 
@@ -50,14 +49,79 @@ func HandleSessionRead(w http.ResponseWriter, r *http.Request) {
 }
 
 func HandleSessionCreate(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	phoneNumber = r.FormValue("phone_number")
+
+	phoneNumber := vars["phone_number"]
+	if phoneNumber == "" {
+		w.Write([]byte("Need to pass in a phone number to this URL."))
+		return
+	}
+	password := r.FormValue("password")
+	if password == "" {
+		w.Write([]byte("Need to pass in a password to this URL."))
+		return
+	}
+
+	orm, err := model.NewORM("development.db")
+	if err != nil {
+		logger.Println(err)
+	}
+
+	user := orm.FindUserByPhoneNumber(phoneNumber)
+	if ! user.Password == password {
+		w.Write([]byte("Incorrect password - phone number combination."))
+		return
+	}
+
+	session := &Session{
+		SessionId: 0,
+		Expiration: time.Now().Truncate(time.Second).UTF(),
+		UserId: user.UserId,
+	}
+	session.Save()
+
+
 	s := `{
-		"session_id": 29,
-		"user_id":    120,
+		"session_id": %v,
+		"user_id":    %v,
 	}`
+	payload := fmt.Sprintf(s, session.SessionId, session.UserId)
 	w.Write([]byte(s))
 }
 
 func HandleContactsRead(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	userID := vars["id"]
+	sessionID := r.FormValue("session_id")
+
+	orm, err := model.NewORM("development.db")
+	if err != nil {
+		logger.Println(err)
+	}
+	id, _ := strconv.Atoi(sessionID)
+	session := orm.FindSessionByID(id)
+
+	if ! session.IsValid() {
+		w.Write([]byte("Expired or invalid session."))
+		return
+	}
+
+	user := orm.FindUserByID(session.UserID)
+	contacts := orm.FindContactsByUser(user)
+
+	asJson, err := json.Marshal(contacts)
+	if err != nil {
+		w.Write(err)
+		return
+	}
+
+	w.Write([]byte(`{ "contacts": `))
+	w.Write(asJson)
+	w.Write(`}`)
+	/*
 	s := `{
 		“contacts”: [ 
 			{ 
@@ -72,8 +136,7 @@ func HandleContactsRead(w http.ResponseWriter, r *http.Request) {
 				“last_name”:	“Reynolds”, 
 			}
 		],
-	}`
-	w.Write([]byte(s))
+	}`*/
 }
 
 func HandleMemoRead(w http.ResponseWriter, r *http.Request) {

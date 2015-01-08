@@ -24,6 +24,9 @@ type ORM interface {
 	FindSessionByID(int) *Session
 	FindUserByID(int) *User
 	FindMemoByID(int) *Memo
+	FindUserByPhoneNumber(string) *User
+
+	FindContactsByUser(User* ) []*Contact
 }
 
 type ormDelegate struct {
