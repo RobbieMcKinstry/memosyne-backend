@@ -1,29 +1,29 @@
 Contact
-cid INT NOT NULL
+cid INT UNIQUE NOT NULL
 phone_num TEXT NOT NULL
 status INT
 first_name TEXT
 last_name TEXT
-FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))
 
 User
 phone_num TEXT KEY NOT NULL
 email TEXT NOT NULL
 first_name TEXT
 last_name TEXT
-user_id INT NOT NULL
+user_id INT UNIQUE NOT NULL
 password TEXT NOT NULL
 PRIMARY KEY(phone_num,email,user_id))
 
 Contact_Reference
-contact_ref INT NOT NULL
+contact_ref INT NOT NULL //THIS MAPS TO A USER ID
 contact_id INT NOT NULL
-FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))
+FOREIGN KEY(contact_ref) REFERENCES User(user_id)
+PRIMARY KEY(contact_ref,contact_id)
 
 Memo
 id INT NOT NULL
-sender_id INT
-recipient_id INT
+sender_id INT //USER ID
+recipient_id INT //CONTACT ID
 body TEXT
 time INT NOT NULL
 FOREIGN KEY(sender_id) REFERENCES User(user_id), PRIMARY KEY(id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid)
