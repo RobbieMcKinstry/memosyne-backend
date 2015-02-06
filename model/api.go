@@ -6,6 +6,7 @@ import (
 
 	logger "github.com/Sirupsen/logrus"
 	_ "github.com/mxk/go-sqlite/sqlite3"
+	"strconv"
 )
 
 
@@ -328,34 +329,35 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 
 func GetContactsByUserID(user_id int) []*Contact {
 	db := Db_connect()
-	//contactCount, err := db.Query("SELECT COUNT(*) FROM Contact")
-	contacts, err := db.Query("SELECT * FROM Contact,Contact_Reference WHERE Contact_Reference.contact_ref=? AND Contact_Reference.contact_id=Contact.cid", user_id)
+	rows, err := db.Query("SELECT * FROM Contact,Contact_Reference WHERE Contact_Reference.contact_ref=? AND Contact_Reference.contact_id=Contact.cid", user_id)
 	if err != nil {
 		logger.Println(err)
 	}
-
 	var contactPointerList []*Contact
 	contactPointerList = make([]*Contact, 0)
-
-	defer contacts.Close()
-	for contacts.Next() {
-		newContactObj := new(Contact)
-
-		var theCid int
-		var thePhoneNum string
-		var theFirstName string
-		var theLastName string
-		var theStatus int
-
-		err = contacts.Scan(&theCid, &thePhoneNum, &theFirstName, &theLastName, &theStatus)
-
-		//newContactObj = &Contact{theCid, thePhoneNum, theFirstName, theLastName, theStatus} // TODO implement a patch
-
-		contactPointerList = append(contactPointerList, newContactObj)
-	}
+	//what follows is hacky as hell but it works.
+	cols, _ := rows.Columns()
+    n := len(cols)
+    var fields []interface{}
+    for i := 0; i < n; i++ {
+        fields = append(fields, new(string))
+    }
+    for rows.Next() {
+        rows.Scan(fields...)
+        var cid int64
+        cid, _ = strconv.ParseInt(*(fields[0]).(*string),0,0)
+        var phone_num string = *(fields[1]).(*string)
+        var status int64
+        status, _ = strconv.ParseInt(*(fields[2]).(*string),0,0)
+        var first_name string= *(fields[3]).(*string)
+        var last_name string= *(fields[4]).(*string)
+        newContactObj := &Contact{int(cid),phone_num,int(status),first_name,last_name}
+        contactPointerList = append(contactPointerList,newContactObj)
+    }
 	db.Close()
 	return contactPointerList
 }
+	
 
 /*
  a function that gets me all

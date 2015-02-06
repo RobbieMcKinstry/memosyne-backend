@@ -1,11 +1,12 @@
 package model
 
+
 type Contact struct {
-	ContactId int
-	PhoneNum  string
+	ContactId int `json:"contact_id"`
+	PhoneNum  string `json:"phone_number"`
 	Status    int
-	FirstName string
-	LastName  string
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 type Contact_reference struct {

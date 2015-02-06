@@ -6,7 +6,12 @@ import (
 
 	"fmt"
 	"net/http"
+	"strconv"
+	"encoding/json"
+	. "./model"
 )
+
+
 
 func main() {
 	logger.Println("Hello Memosyne")
@@ -62,24 +67,17 @@ func HandleSessionCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(s))
 }
 
-
+//note: there is currently zero test coverage on this
+//function is implemented and will pull data from db
 func HandleContactsRead(w http.ResponseWriter, r *http.Request) {
-	s := `{
-		“contacts”: [ 
-			{ 
-				“contact_id”: 1,
-				“phone_number”: “412-445-3171”,
-				“first_name”:	“Robbie”,
-				“last_name”:	“McKinstry”, 
-			}, {
-				“contact_id”: 2,
-				“phone_number”: “412-661-2963”,
-				“first_name”:	“Malcolm”,
-				“last_name”:	“Reynolds”, 
-			}
-		],
-	}`
-	w.Write([]byte(s))
+	vars := mux.Vars(r) // gorilla mux.. or something
+	var uid64, _ = strconv.ParseInt(vars["id"],0,0) //user id.
+	var uid int = (int(uid64))
+	//get all the contacts out of the database for the user id
+	//currently using api.go rather than ORM delegate
+	var conts = GetContactsByUserID(uid)
+	jsons,_ := json.Marshal(conts)
+	w.Write(jsons)
 }
 
 
