@@ -3,9 +3,6 @@
 --or outside
 --sqlite3 sqlite.db < db-init.sql
 
-.output stdout;
---.explain ON;
-
 --turn on foreign keys
 PRAGMA foreign_keys = ON;
 
@@ -21,3 +18,6 @@ INSERT INTO 'Session' VALUES ("1","20150504111515","1");
 INSERT INTO 'Contact_Reference' VALUES ("1","1");
 INSERT INTO 'Contact' VALUES ("1","724-321-5520","2","Justin","Rushin III");
 INSERT INTO 'Memo' VALUES ("1","1","1","lol","201502010111515");
+
+INSERT INTO 'Contact_Reference' VALUES ("1","2");
+INSERT INTO 'Contact' VALUES ("2","724-321-5521","2","Jason","Rustin IV");
