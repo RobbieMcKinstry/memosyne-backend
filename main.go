@@ -2,16 +2,14 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/Sirupsen/logrus"
+	logger "github.com/Sirupsen/logrus"
 
 	"fmt"
 	"net/http"
 )
 
-var log = logrus.New();
-
 func main() {
-	log.Println("Hello Memosyne")
+	logger.Println("Hello Memosyne")
 
 	r := mux.NewRouter()
 	r.HandleFunc("/sessions/{id}", HandleSessionRead).Methods("GET")
@@ -28,7 +26,7 @@ func main() {
 	r.HandleFunc("/", HandleHelloWorld)
 	http.Handle("/", r)
 
-	log.Println("Now listening on port 8080")
+	logger.Println("Now listening on port 8080")
 	http.ListenAndServe(":8080", nil)
 }
 

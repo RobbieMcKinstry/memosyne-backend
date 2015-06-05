@@ -4,20 +4,20 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/Sirupsen/logrus"
+	logger "github.com/Sirupsen/logrus"
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
-var log = logrus.New()
+
 
 func Db_connect() *sql.DB {
 	db, err := sql.Open("sqlite3", "sqlite.db")
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 	rows, err2 := db.Query("PRAGMA foreign_keys = ON;")
 	if err2 != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 	rows.Close()
 	return db
@@ -26,7 +26,7 @@ func Db_connect() *sql.DB {
 func GetSessionByID(id int, connection *sql.DB) *Session {
 	rows, err := connection.Query("SELECT COUNT(*) FROM Session WHERE session_id=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
@@ -34,7 +34,7 @@ func GetSessionByID(id int, connection *sql.DB) *Session {
 		err = rows.Scan(&count)
 	}
 
-	log.Println(count)
+	logger.Println(count)
 
 	if count == 0 {
 		return nil
@@ -42,7 +42,7 @@ func GetSessionByID(id int, connection *sql.DB) *Session {
 
 	rows, err = connection.Query("SELECT * FROM Session WHERE session_id=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var s_id int
@@ -55,7 +55,7 @@ func GetSessionByID(id int, connection *sql.DB) *Session {
 	}
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return nil
 	}
 
@@ -67,7 +67,7 @@ func GetSessionByID(id int, connection *sql.DB) *Session {
 func GetUserByPhone(phone, connection *sql.DB) *User {
 	rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE phone_num=?", phone)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
@@ -75,7 +75,7 @@ func GetUserByPhone(phone, connection *sql.DB) *User {
 		err = rows.Scan(&count)
 	}
 
-	log.Println(count)
+	logger.Println(count)
 
 	if count == 0 {
 		return nil
@@ -83,7 +83,7 @@ func GetUserByPhone(phone, connection *sql.DB) *User {
 
 	rows, err = connection.Query("SELECT * FROM User WHERE phone_num=?", phone)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var p_num string
@@ -100,7 +100,7 @@ func GetUserByPhone(phone, connection *sql.DB) *User {
 	}
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return nil
 	}
 
@@ -112,7 +112,7 @@ func GetUserByPhone(phone, connection *sql.DB) *User {
 func GetUserByEmail(connection *sql.DB, e_mail string) *User {
 	rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE email=?", e_mail)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
@@ -120,7 +120,7 @@ func GetUserByEmail(connection *sql.DB, e_mail string) *User {
 		err = rows.Scan(&count)
 	}
 
-	log.Println(count)
+	logger.Println(count)
 
 	if count == 0 {
 		return nil
@@ -128,7 +128,7 @@ func GetUserByEmail(connection *sql.DB, e_mail string) *User {
 
 	rows, err = connection.Query("SELECT * FROM User WHERE email=?", e_mail)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var p_num string
@@ -145,7 +145,7 @@ func GetUserByEmail(connection *sql.DB, e_mail string) *User {
 	}
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return nil
 	}
 
@@ -157,7 +157,7 @@ func GetUserByEmail(connection *sql.DB, e_mail string) *User {
 func GetUserByID(id, connection *sql.DB) *User {
 	rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE user_id=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
@@ -165,7 +165,7 @@ func GetUserByID(id, connection *sql.DB) *User {
 		err = rows.Scan(&count)
 	}
 
-	log.Println(count)
+	logger.Println(count)
 
 	if count == 0 {
 		return nil
@@ -173,7 +173,7 @@ func GetUserByID(id, connection *sql.DB) *User {
 
 	rows, err = connection.Query("SELECT * FROM User WHERE user_id=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var p_num string
@@ -190,7 +190,7 @@ func GetUserByID(id, connection *sql.DB) *User {
 	}
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return nil
 	}
 
@@ -202,7 +202,7 @@ func GetUserByID(id, connection *sql.DB) *User {
 func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 	rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE sender_id=?, recipient_id=?", s_id, r_id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
@@ -210,7 +210,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 		err = rows.Scan(&count)
 	}
 
-	log.Println(count)
+	logger.Println(count)
 
 	if count == 0 {
 		return nil
@@ -218,7 +218,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 
 	rows, err = connection.Query("SELECT * FROM User WHERE sender_id=?, recipient_id=?", s_id, r_id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var id int
@@ -233,7 +233,7 @@ func GetMemoByID(s_id int, r_id int, connection *sql.DB) *Memo {
 	}
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return nil
 	}
 
@@ -246,7 +246,7 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 
 	rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE cid=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
@@ -254,7 +254,7 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 		err = rows.Scan(&count)
 	}
 
-	log.Println(count)
+	logger.Println(count)
 
 	if count == 0 {
 		return nil
@@ -262,7 +262,7 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 
 	rows, err = connection.Query("SELECT * FROM User WHERE cid=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var contact_id int
@@ -277,7 +277,7 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 	}
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return nil
 	}
 
@@ -289,7 +289,7 @@ func GetContactByID(id int, connection *sql.DB) *Contact {
 func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 	rows, err := connection.Query("SELECT COUNT(*) FROM User WHERE contact_id=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
@@ -297,7 +297,7 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 		err = rows.Scan(&count)
 	}
 
-	log.Println(count)
+	logger.Println(count)
 
 	if count == 0 {
 		return nil
@@ -305,7 +305,7 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 
 	rows, err = connection.Query("SELECT * FROM User WHERE contact_id=?", id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var c_ref int
@@ -317,7 +317,7 @@ func GetContactRefByID(id int, connection *sql.DB) *Contact_reference {
 	}
 
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return nil
 	}
 
@@ -331,7 +331,7 @@ func GetContactsByUserID(user_id int) []*Contact {
 	//contactCount, err := db.Query("SELECT COUNT(*) FROM Contact")
 	contacts, err := db.Query("SELECT * FROM Contact,Contact_Reference WHERE Contact_Reference.contact_ref=? AND Contact_Reference.contact_id=Contact.cid", user_id)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var contactPointerList []*Contact
@@ -366,7 +366,7 @@ func GetMemosWithinRange(date1 string, date2 string) []*Memo {
 	db := Db_connect()
 	memos, err := db.Query("SELECT * FROM Memos")
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var memosWithinRange []*Memo
@@ -410,7 +410,7 @@ func GetMemosByUserID(uid int) []*Memo {
 
 	memos, err := db.Query("SELECT * FROM Memos")
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var memoPointerList []*Memo
@@ -444,7 +444,7 @@ func GetMemos() []*Memo {
 
 	memos, err := db.Query("SELECT * FROM Memos")
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var memoPointerList []*Memo

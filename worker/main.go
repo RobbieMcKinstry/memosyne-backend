@@ -6,7 +6,7 @@ import (
 	"time"
 
 	twilio "github.com/carlosdp/twiliogo"
-	"github.com/Sirupsen/logrus"
+	logger "github.com/Sirupsen/logrus"
 )
 
 /*
@@ -15,14 +15,12 @@ AllMemos()
 SendMemo()
 */
 
-var log = logrus.New()
-
 func main() {
 	var demo bool
 	flag.BoolVar(&demo, "demo", false, "For use during the stage demonstration at the hackathon. Delete thereafter.")
 
 	if demo {
-		log.Println("Running in demo mode.")
+		logger.Println("Running in demo mode.")
 		SendAllMemos()
 		os.Exit(0)
 	}
@@ -71,8 +69,8 @@ func SendMemo(memo *Memo) {
 	client := twilio.NewClient(sid, auth)
 	message, err := twilio.NewMessage(client, "4124453191", "6238504947", twilio.Body("Hello World!"))
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	} else {
-		log.Println(message.Status)
+		logger.Println(message.Status)
 	}
 }

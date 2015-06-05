@@ -3,7 +3,7 @@ package model
 import (
 	"database/sql"
 	"fmt"
-
+	logger "github.com/Sirupsen/logrus"
 	_ "github.com/mxk/go-sqlite/sqlite3"
 )
 
@@ -31,13 +31,20 @@ func NewORM(connectionString string) (ORM, error) {
 
 	db, err := sql.Open("sqlite3", connectionString)
 	if err != nil {
+		logger.WithFields(logger.Fields{
+			"db_uri": connectionString,
+			"db_error":true,
+		}).Error(err)
 		return nil, err
 	}
 
 	result := &ormDelegate{db}
 	passed := result.CreateTablesIfNotExist()
 	if !passed {
-		log.Println("Failed to create new tables.")
+		logger.WithFields(logger.Fields{
+			"db_uri": connectionString,
+			"db_error":true,
+		}).Error("Failed to create new tables.")
 	}
 	return result, nil
 }
@@ -45,28 +52,32 @@ func NewORM(connectionString string) (ORM, error) {
 func (orm *ormDelegate) IsConnected() bool { return orm.Ping() == nil }
 
 func (orm *ormDelegate) CreateTablesIfNotExist() bool {
-	contactSQL := "CREATE TABLE IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, 'first_name' TEXT, 'last_name' TEXT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
-	userSQL := "CREATE TABLE IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
-	contactReferenceSQL := "CREATE TABLE IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
-	memoSQL := "CREATE TABLE IF NOT EXISTS 'Memo' ('id' INT NOT NULL, 'sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' INT NOT NULL, FOREIGN KEY(sender_id) REFERENCES User(user_id), PRIMARY KEY(id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
-	sessionSQL := "CREATE TABLE IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' INT NOT NULL, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
+	contactSQL := "IF NOT EXISTS 'Contact' ('cid' INT NOT NULL, 'phone_num' TEXT NOT NULL, 'status' INT, 'first_name' TEXT, 'last_name' TEXT, FOREIGN KEY(cid) REFERENCES Contact_Reference(contact_id))"
+	userSQL := "IF NOT EXISTS 'User' ('phone_num' TEXT KEY NOT NULL,'email' TEXT NOT NULL,'first_name' TEXT,'last_name' TEXT, 'user_id' INT NOT NULL, 'password' TEXT NOT NULL, PRIMARY KEY(phone_num,email,user_id))"
+	contactReferenceSQL := "IF NOT EXISTS 'Contact_Reference' ('contact_ref' INT NOT NULL, 'contact_id' INT NOT NULL, FOREIGN KEY(contact_ref) REFERENCES User(user_id),PRIMARY KEY(contact_ref,contact_id))"
+	memoSQL := "IF NOT EXISTS 'Memo' ('id' INT NOT NULL, 'sender_id' INT, 'recipient_id' INT, 'body' TEXT,'time' INT NOT NULL, FOREIGN KEY(sender_id) REFERENCES User(user_id), PRIMARY KEY(id), FOREIGN KEY(recipient_id) REFERENCES Contact(cid))"
+	sessionSQL := "IF NOT EXISTS 'Session' ('session_id' INT, 'expiration' INT NOT NULL, 'user_id' INT, PRIMARY KEY(session_id,user_id))"
 
 	tables := []string{contactSQL, userSQL, contactReferenceSQL, memoSQL, sessionSQL}
-	for _, tableSQL := range tables {
+	for index, tableSQL := range tables {
 		result := orm.CreateTableFromString(tableSQL)
 		if !result {
-			log.Println("Failed to intialize all of the tables.")
+			logger.WithFields(logger.Fields{"orm_connected":orm.IsConnected(),"statement":index,"db_error":true,}).Error("Failed to intialize all of the tables.")
 			return false
 		}
 	}
 	return true
 }
 
+//CreateTableFromString accepts a partial SQL statement
+//beginning with an optional "IF NOT EXISTS"
+//followed by the table name and columns. Essentially all it does is append
+//"CREATE TABLE " (note the space) to the start of the string
+//It then prepares and executes the statement in a transaction.
 func (orm *ormDelegate) CreateTableFromString(creationSQL string) bool {
-
-	stmt, err := orm.Prepare(creationSQL)
+	stmt, err := orm.Prepare("CREATE TABLE " + creationSQL)
 	if err != nil {
-		log.Println(err)
+		logger.WithFields(logger.Fields{"orm_connected":orm.IsConnected(),"db_error":true,}).Error(err)
 		return false
 	}
 	execInTransaction(orm, stmt)
@@ -80,7 +91,7 @@ func (orm *ormDelegate) newContact(contact *Contact) {
 	stmt, err := orm.Prepare("INSERT INTO contact VALUES(?,?,?,?,?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return
 	}
 	execInTransaction(orm, stmt, contact.ContactId, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName)
@@ -93,7 +104,7 @@ func (orm *ormDelegate) SaveContact(contact *Contact) *Contact {
 		stmt, err := orm.Prepare("UPDATE Contact SET Contact.phone_num=?, Contact.status=?, Contact.first_name=?, Contact.last_name=? WHERE Contact.cid = ?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return contact
 		}
 		execInTransaction(orm, stmt, contact.PhoneNum, contact.Status, contact.FirstName, contact.LastName, contact.ContactId)
@@ -108,7 +119,7 @@ func (orm *ormDelegate) SaveMemo(memo *Memo) *Memo {
 		stmt, err := orm.Prepare("UPDATE Memo SET Memo.sender_id=?, Memo.recipient_id=?, body=?, time=? WHERE Memo.id=?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return memo
 		}
 		execInTransaction(orm, stmt, memo.SenderId, memo.RecipientId, memo.Body, memo.Time, memo.ID)
@@ -124,7 +135,7 @@ func (orm *ormDelegate) newMemo(memo *Memo) {
 	stmt, err := orm.Prepare("INSERT INTO Memo ('id', 'sender_id', 'recipient_id', 'body', 'time') VALUES (?, ?, ?, ?, ?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 	execInTransaction(orm, stmt, memo.ID, memo.SenderId, memo.RecipientId, memo.Body, memo.Time)
 }
@@ -136,7 +147,7 @@ func (orm *ormDelegate) SaveUser(user *User) *User {
 		stmt, err := orm.Prepare("UPDATE User SET User.user_id=?, User.first_name=?, User.last_name=?, User.email=?, User.password=? WHERE User.phone_num=?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return user
 		}
 		execInTransaction(orm, stmt, user.UserId, user.FirstName, user.LastName, user.Email, user.Password, user.PhoneNum)
@@ -151,7 +162,7 @@ func (orm *ormDelegate) newUser(user *User) {
 	stmt, err := orm.Prepare("INSERT INTO User VALUES (?, ?, ?, ?, ?, ?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return
 	}
 
@@ -162,27 +173,27 @@ func (orm *ormDelegate) findIDFromTable(idName, tableName string) int {
 	result := 1
 	rows, err := orm.Query(fmt.Sprintf("SELECT COUNT(*) FROM %v", tableName))
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
 
 	var count int
 	for rows.Next() {
 		err = rows.Scan(&count)
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 		}
 	}
 	if count != 0 {
 		var uid int
 		rows, err = orm.Query(fmt.Sprintf("SELECT MAX(%v) FROM %v", idName, tableName))
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 		}
 		for rows.Next() {
 			err = rows.Scan(&uid)
 		}
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 		}
 		result = uid + 1
 	}
@@ -196,7 +207,7 @@ func (orm *ormDelegate) SaveSession(session *Session) *Session {
 		stmt, err := orm.Prepare("UPDATE Session SET expiration=?, user_id=? WHERE session_id=?")
 		defer stmt.Close()
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			return session
 		}
 		execInTransaction(orm, stmt, session.Expiration, session.UserId, session.SessionId)
@@ -211,7 +222,7 @@ func (orm *ormDelegate) newSession(session *Session) *Session {
 	stmt, err := orm.Prepare("INSERT INTO Session VALUES (?, ?, ?)")
 	defer stmt.Close()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		return session
 	}
 	execInTransaction(orm, stmt, session.SessionId, session.Expiration, session.UserId)
@@ -242,7 +253,7 @@ func execInTransaction(orm *ormDelegate, stmt *sql.Stmt, args ...interface{}) {
 
 func rollbackOnErr(err error, tx *sql.Tx) bool {
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		tx.Rollback()
 	}
 	return err != nil
